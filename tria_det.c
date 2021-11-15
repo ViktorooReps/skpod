@@ -41,7 +41,7 @@ det(double **matrix, size_t len, size_t threads)
         double diag_elem = matrix[r_idx][r_idx];
         double inv_diag_elem = 1.0 / diag_elem;
 
-        mult_row(matrix[r_idx], inv_diag_elem);
+        mult_row(matrix[r_idx], inv_diag_elem, len);
         det *= diag_elem;
     }
 
