@@ -7,6 +7,6 @@ if __name__ == '__main__':
     data = pd.read_csv('data.csv', sep='\t')
     data = data.pivot("n", "threads", "time")
     ax = sns.heatmap(data, norm=LogNorm(), square=True)
-    ax.set_title('Execution time with nxn matrix')
+    ax.set_title('Execution time in seconds with nxn matrix')
 
     plt.savefig('heatmap.png')
