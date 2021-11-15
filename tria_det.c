@@ -21,18 +21,11 @@ add_row(double *row_dest, double *row_to_add, size_t row_len)
 }
 
 double
-det(double **matrix, size_t len)
+det(double **matrix, size_t len, size_t threads)
 {
     double det = 1.0;
 
-    for (int i = 0; i < len; ++i) {
-        double diag_elem = matrix[i][i];
-        double inv_diag_elem = 1.0 / diag_elem;
-
-        mult_row(matrix[i], inv_diag_elem);
-        det *= diag_elem;
-    }
-
+#pragma omp parallel for private(r_idx, c_idx) shared(matrix) num_threads(threads)
     for (int r_idx = 0; r_idx < len; ++r_idx) {
         for (int c_idx = 0; c_idx < r_idx; ++c_idx) {
             double elem = matrix[r_idx][c_idx];
@@ -98,7 +91,7 @@ main()
                 matrix = init_matrix(n[i], maxval);
 
                 timer_omp = omp_get_wtime();
-                double d = det(matrix, n[i], n[i], threads[j]);
+                double d = det(matrix, n[i], threads[j]);
                 avg_time += omp_get_wtime() - timer_omp;
             }
             avg_time /= 5.0;
