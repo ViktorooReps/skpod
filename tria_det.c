@@ -78,7 +78,7 @@ main()
     srand(time(NULL));
     double **matrix;
     int n[8] = {16, 32, 64, 128, 256, 512, 1024, 2048};
-    int threads[7] = {1, 2, 4, 8, 16, 32, 64, 128};
+    int threads[8] = {1, 2, 4, 8, 16, 32, 64, 128};
     double timer_omp, avg_time, maxval;
     printf("size\tn_thread\taverage_time\n");
     for (int i = 0; i < 10; i++)
