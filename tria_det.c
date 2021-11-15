@@ -25,7 +25,7 @@ det(double **matrix, size_t len, size_t threads)
 {
     double det = 1.0;
 
-#pragma omp parallel for private(r_idx, c_idx) shared(matrix) num_threads(threads)
+#pragma omp parallel for private(r_idx, c_idx) shared(matrix, det) num_threads(threads)
     for (int r_idx = 0; r_idx < len; ++r_idx) {
         for (int c_idx = 0; c_idx < r_idx; ++c_idx) {
             double elem = matrix[r_idx][c_idx];
