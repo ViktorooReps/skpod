@@ -81,9 +81,9 @@ main()
     int threads[8] = {1, 2, 4, 8, 16, 32, 64, 128};
     double timer_omp, avg_time, maxval;
     printf("size\tn_thread\taverage_time\n");
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 8; i++)
     {
-        for (int j = 0; j < 7; j++)
+        for (int j = 0; j < 8; j++)
         {
             avg_time = 0.0;
             maxval = 100000.0 / n[i] / n[i] / n[i];
