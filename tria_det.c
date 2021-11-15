@@ -78,14 +78,14 @@ main()
     double **matrix;
     int n[7] = {16, 32, 64, 128, 256, 512, 1024};
     int threads[7] = {1, 2, 4, 8, 16, 32, 64};
-    double timer_omp, avg_time;
-    double maxval = 100000.0 / n / n / n;
+    double timer_omp, avg_time, maxval;
     printf("size\tn_thread\taverage_time\n");
     for (int i = 0; i < 10; i++)
     {
         for (int j = 0; j < 7; j++)
         {
             avg_time = 0.0;
+            maxval = 100000.0 / n[i] / n[i] / n[i];
             for (int k = 0; k < 5; k++)
             {
                 matrix = init_matrix(n[i], maxval);
