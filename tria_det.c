@@ -81,13 +81,14 @@ main()
     int threads[8] = {1, 2, 4, 8, 16, 32, 64, 128};
     double timer_omp, avg_time, maxval;
     printf("size\tn_thread\taverage_time\n");
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 11; i++)
     {
         for (int j = 0; j < 8; j++)
         {
             avg_time = 0.0;
-            maxval = 100000.0 / n[i] / n[i] / n[i];
-            for (int k = 0; k < 5; k++)
+            maxval = 100000.0 / n[i] / n[i];
+            int runs = 5 * (11 - i);
+            for (int k = 0; k < runs; k++)
             {
                 matrix = init_matrix(n[i], maxval);
 
@@ -95,7 +96,7 @@ main()
                 double d = det(matrix, n[i], threads[j]);
                 avg_time += omp_get_wtime() - timer_omp;
             }
-            avg_time /= 5.0;
+            avg_time /= (double)runs;
             printf("%d\t%d\t%f\n", n[i], threads[j], avg_time);
         }
         free_matrix(matrix, n[i]);
