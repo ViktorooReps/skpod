@@ -4,3 +4,4 @@ Results on MSU Polus machine:
 
 
 ![](heatmap.png)
+![](lineplot.png)
