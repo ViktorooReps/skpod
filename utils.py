@@ -6,7 +6,6 @@ from enum import Enum
 from os import PathLike
 from pathlib import Path
 from time import sleep
-from typing import Iterable, List
 
 
 logger = logging.getLogger(__name__)
@@ -21,16 +20,16 @@ class Machine(Enum):
     BLUEGENE = 'bluegene'
 
 
-def xlc_compile(src_filename: PathLike, args: Iterable[str] = tuple()):
+def xlc_compile(src_filename, args):
     logger.info(f'Compiling {src_filename}...')
 
-    args: List[str] = ['xlc'] + list(args) + [str(src_filename)]
+    args = ['xlc'] + list(args) + [str(src_filename)]
     subprocess.run(args)
 
     logger.info(f'Compilation finished')
 
 
-def schedule(machine: Machine, n_processes: int, exec_file: PathLike, res_filename: str, use_threads: bool = False):
+def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
     logger.info(f'Scheduling {res_filename} job for {n_processes} {"threads" if use_threads else "processes"}...')
 
     if machine == Machine.POLUS:
@@ -55,7 +54,7 @@ def schedule(machine: Machine, n_processes: int, exec_file: PathLike, res_filena
     logger.info(f'Job {res_filename} scheduled!')
 
 
-def wait(res_filename: str):
+def wait(res_filename):
     out_file = Path(res_filename + '.out')
     err_file = Path(res_filename + '.err')
 
@@ -67,7 +66,7 @@ def wait(res_filename: str):
     logger.info(f'Job {res_filename} finished!')
 
 
-def collect_results(res_filename: str) -> str:
+def collect_results(res_filename) -> str:
     with open(res_filename + '.out') as f:
         res = f.read()
 
@@ -80,7 +79,7 @@ def collect_results(res_filename: str) -> str:
         raise NoOutputException(err_text)
 
 
-def save_results(dest: PathLike, results: Iterable[str]):
+def save_results(dest, results):
     combined_results = ''.join(results)
     with open(dest, 'w') as f:
         f.write(combined_results)
