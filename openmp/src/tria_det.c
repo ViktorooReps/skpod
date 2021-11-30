@@ -84,7 +84,7 @@ main(int argc, char **argv)
     double **matrix;
     int n[11] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048};
     int threads;
-    sscanf(argv[1], "%d", &threads)
+    sscanf(argv[1], "%d", &threads);
     double timer_omp, avg_time, maxval;
     printf("<OUTPUT>");
     for (int i = 0; i < 11; i++)
