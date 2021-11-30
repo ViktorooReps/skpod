@@ -31,7 +31,7 @@ def xlc_compile(src_filename: PathLike, args: Iterable[str] = tuple()):
 
 
 def schedule(machine: Machine, n_processes: int, exec_file: PathLike, res_filename: str, use_threads: bool = False):
-    logger.info(f'Scheduling {res_filename} job for {n_processes} processes...')
+    logger.info(f'Scheduling {res_filename} job for {n_processes} {"threads" if use_threads else "processes"}...')
 
     if machine == Machine.POLUS:
         args = ['mpisubmit.pl',
