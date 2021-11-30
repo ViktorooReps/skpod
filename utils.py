@@ -109,7 +109,7 @@ def create_parser() -> ArgumentParser:
                         help='Experiment name')
     parser.add_argument('--results', type=str, default='results.csv',
                         help='Filename to save results to')
-    parser.add_argument('--mpi', type=bool, default=False,
+    parser.add_argument('--mpi', dest='feature', action='store_true',
                         help='Use MPI to parallel')
 
     return parser
