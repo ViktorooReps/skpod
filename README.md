@@ -3,7 +3,7 @@
 Results on MSU Polus machine:
 
 
-![](heatmap.png)
-![](lineplot.png)
-![](lineplot_small.png)
-![](lineplot_big.png)
+![](openmp/graphs/heatmap.png)
+![](openmp/graphs/lineplot.png)
+![](openmp/graphs/lineplot_small.png)
+![](openmp/graphs/lineplot_big.png)
