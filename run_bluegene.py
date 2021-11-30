@@ -1,7 +1,6 @@
 import logging
 import sys
 from pathlib import Path
-from typing import List
 
 from utils import create_parser, xlc_compile, schedule, Machine, wait, collect_results, save_results
 
@@ -16,7 +15,7 @@ if __name__ == '__main__':
     compile_args = ['-qsmp=omp', '-o', args.exec_file]
     xlc_compile(Path(args.src_file), compile_args)
 
-    results: List[str] = []
+    results = []
     for n_proc in args.processes:
         job_name = args.experiment + f'-{n_proc}{"p" if args.mpi else "t"}'
 
