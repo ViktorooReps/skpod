@@ -20,7 +20,7 @@ class Machine(Enum):
 
 
 def xlc_compile(src_filename, args):
-    logger.info(f'Compiling {src_filename}...')
+    logger.info('Compiling ' + src_filename + '...')
 
     args = ['xlc'] + list(args) + [str(src_filename)]
     subprocess.run(args)
