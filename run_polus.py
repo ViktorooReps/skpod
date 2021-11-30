@@ -20,7 +20,8 @@ if __name__ == '__main__':
     for n_proc in args.processes:
         job_name = args.experiment + f'-{n_proc}p'
 
-        schedule(Machine.POLUS, n_proc, exec_file=Path(args.exec_file), res_filename=job_name)
+        schedule(Machine.POLUS, n_proc, exec_file=Path(args.exec_file), res_filename=job_name,
+                 use_threads=not args.mpi)
         wait(job_name)
 
         results.append(collect_results(job_name))

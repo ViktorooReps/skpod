@@ -30,19 +30,19 @@ def xlc_compile(src_filename: PathLike, args: Iterable[str] = tuple()):
     logger.info(f'Compilation finished')
 
 
-def schedule(machine: Machine, n_processes: int, exec_file: PathLike, res_filename: str):
+def schedule(machine: Machine, n_processes: int, exec_file: PathLike, res_filename: str, use_threads: bool = False):
     logger.info(f'Scheduling {res_filename} job for {n_processes} processes...')
 
     if machine == Machine.POLUS:
         args = ['mpisubmit.pl',
-                '--processes', str(n_processes),
+                '--processes', str(n_processes) if not use_threads else '1',
                 '--stdout', res_filename + '.out',
                 '--stderr', res_filename + '.err',
                 str(exec_file),
                 '--', str(n_processes)]
     elif machine == Machine.BLUEGENE:
         args = ['mpisubmit.bg',
-                '--nproc', str(n_processes),
+                '--nproc', str(n_processes) if not use_threads else '1',
                 '--stdout', res_filename + '.out',
                 '--stderr', res_filename + '.err',
                 str(exec_file),
@@ -109,4 +109,7 @@ def create_parser() -> ArgumentParser:
                         help='Experiment name')
     parser.add_argument('--results', type=str, default='results.csv',
                         help='Filename to save results to')
+    parser.add_argument('--mpi', type=bool, default=False,
+                        help='Use MPI to parallel')
+
     return parser
