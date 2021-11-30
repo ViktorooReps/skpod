@@ -26,8 +26,8 @@ det(double **matrix, size_t len, size_t threads)
     double det = 1.0;
 
     int diag_idx, c_idx;
-#pragma omp parallel for private(r_idx, c_idx) shared(matrix, det) num_threads(threads)
-    for (diag_idx = 0; diag_idx < len; ++r_idx) {
+#pragma omp parallel for private(diag_idx, c_idx) shared(matrix, det) num_threads(threads)
+    for (diag_idx = 0; diag_idx < len; ++diag_idx) {
         // reset all elements before diagonal to zero
         for (c_idx = 0; c_idx < diag_idx; ++c_idx) {
             double elem = matrix[diag_idx][c_idx];
