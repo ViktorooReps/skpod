@@ -3,7 +3,6 @@ import subprocess
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import datetime
 from enum import Enum
-from os import PathLike
 from pathlib import Path
 from time import sleep
 
@@ -30,7 +29,8 @@ def xlc_compile(src_filename, args):
 
 
 def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
-    logger.info(f'Scheduling {res_filename} job for {n_processes} {"threads" if use_threads else "processes"}...')
+    logger.info('Scheduling ' + res_filename + ' job for ' + str(n_processes)
+                + (" threads" if use_threads else " processes") + ' ...')
 
     if machine == Machine.POLUS:
         args = ['mpisubmit.pl',
@@ -51,19 +51,19 @@ def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
 
     subprocess.run(args)
 
-    logger.info(f'Job {res_filename} scheduled!')
+    logger.info('Job' + 'res_filename' + 'scheduled!')
 
 
 def wait(res_filename):
     out_file = Path(res_filename + '.out')
     err_file = Path(res_filename + '.err')
 
-    logger.info(f'Waiting for {res_filename} job...')
+    logger.info(f'Waiting for ' + res_filename + ' job...')
 
     while not (out_file.exists() or err_file.exists()):
         sleep(1)
 
-    logger.info(f'Job {res_filename} finished!')
+    logger.info(f'Job ' + res_filename + ' finished!')
 
 
 def collect_results(res_filename) -> str:
@@ -84,7 +84,7 @@ def save_results(dest, results):
     with open(dest, 'w') as f:
         f.write(combined_results)
 
-    logger.info(f'Saved {len(combined_results.splitlines())} entries')
+    logger.info('Saved ' + str(len(combined_results.splitlines())) + ' entries')
 
 
 def create_parser() -> ArgumentParser:
@@ -95,7 +95,7 @@ def create_parser() -> ArgumentParser:
     curr_hour = curr_datetime.hour
     curr_minute = curr_datetime.minute
 
-    experiment_desc = f'{curr_day}-{curr_month}-{curr_hour}:{curr_minute}-job'
+    experiment_desc = str(curr_day) + '-' + curr_month + '-' + str(curr_hour) + ':' + str(curr_minute) + '-job'
 
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('processes', type=int, nargs='+',

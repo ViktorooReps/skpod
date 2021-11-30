@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     results = []
     for n_proc in args.processes:
-        job_name = args.experiment + f'-{n_proc}{"p" if args.mpi else "t"}'
+        job_name = args.experiment + '-' + str(n_proc) + ("p" if args.mpi else "t")
 
         schedule(Machine.BLUEGENE, n_proc, exec_file=Path(args.exec_file), res_filename=job_name,
                  use_threads=not args.mpi)
