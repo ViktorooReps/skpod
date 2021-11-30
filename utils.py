@@ -1,9 +1,9 @@
 import logging
+import os
 import subprocess
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
 from time import sleep
 
 
@@ -55,12 +55,12 @@ def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
 
 
 def wait(res_filename):
-    out_file = Path(res_filename + '.out')
-    err_file = Path(res_filename + '.err')
+    out_file = res_filename + '.out'
+    err_file = res_filename + '.err'
 
     logger.info(f'Waiting for ' + res_filename + ' job...')
 
-    while not (out_file.exists() or err_file.exists()):
+    while not (os.path.isfile(out_file) or os.path.isfile(err_file)):
         sleep(1)
 
     logger.info(f'Job ' + res_filename + ' finished!')
