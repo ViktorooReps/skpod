@@ -24,5 +24,5 @@ if __name__ == '__main__':
 
         results.append(collect_results(job_name))
 
-    save_results(Path(args.results), results)
+    save_results(args.results, results)
 
