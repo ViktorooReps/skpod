@@ -58,8 +58,10 @@ def wait(res_filename):
 
     logger.info('Waiting for ' + res_filename + ' job...')
 
+    sleep_counter = 1
     while not (os.path.isfile(out_file) or os.path.isfile(err_file)):
-        sleep(1)
+        sleep(sleep_counter)
+        sleep_counter *= 8
 
     logger.info('Job ' + res_filename + ' finished!')
 
