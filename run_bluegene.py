@@ -11,7 +11,7 @@ if __name__ == '__main__':
     arg_parser = create_parser()
     args = arg_parser.parse_args()
 
-    compile_args = ['-qsmp=omp', '-o', args.exec_file]
+    compile_args = ['-qsmp=omp', 'max-page-size=4096', '-o', args.exec_file]
     xlc_compile(Machine.BLUEGENE, args.src_file, compile_args)
 
     results = []
