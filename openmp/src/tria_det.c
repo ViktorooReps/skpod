@@ -74,33 +74,36 @@ free_matrix(double **matrix, int n)
 }
 
 int
-main()
+main(int argc, char **argv)
 {
-    srand(time(NULL));
+    srand(42);
+    if (argc != 2) {
+        return -1;
+    }
+
     double **matrix;
     int n[11] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048};
-    int threads[8] = {1, 2, 4, 8, 16, 32, 64, 128};
+    int threads;
+    sscanf(argv[1], "%d", &threads)
     double timer_omp, avg_time, maxval;
-    printf("size\tn_thread\taverage_time\n");
+    printf("<OUTPUT>");
     for (int i = 0; i < 11; i++)
     {
-        for (int j = 0; j < 8; j++)
+        avg_time = 0.0;
+        maxval = 100000.0 / n[i] / n[i];
+        int runs = 5 * (11 - i);
+        for (int k = 0; k < runs; k++)
         {
-            avg_time = 0.0;
-            maxval = 100000.0 / n[i] / n[i];
-            int runs = 5 * (11 - i);
-            for (int k = 0; k < runs; k++)
-            {
-                matrix = init_matrix(n[i], maxval);
+            matrix = init_matrix(n[i], maxval);
 
-                timer_omp = omp_get_wtime();
-                double d = det(matrix, n[i], threads[j]);
-                avg_time += omp_get_wtime() - timer_omp;
-            }
-            avg_time /= (double)runs;
-            printf("%d\t%d\t%f\n", n[i], threads[j], avg_time);
+            timer_omp = omp_get_wtime();
+            double d = det(matrix, n[i], threads);
+            avg_time += omp_get_wtime() - timer_omp;
         }
+        avg_time /= (double)runs;
+        printf("%d\t%d\t%f\n", n[i], threads, avg_time);
         free_matrix(matrix, n[i]);
     }
+    printf("<OUTPUT>");
     return 0;
 }

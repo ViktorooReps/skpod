@@ -1,5 +1,7 @@
 import logging
 import subprocess
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from datetime import datetime
 from enum import Enum
 from os import PathLike
 from pathlib import Path
@@ -80,3 +82,27 @@ def save_results(dest: PathLike, results: Iterable[str]):
         f.write(combined_results)
 
     logger.info(f'Saved {len(combined_results.splitlines())} entries')
+
+
+def create_parser() -> ArgumentParser:
+    curr_datetime = datetime.now()
+
+    curr_month = curr_datetime.strftime("%b")
+    curr_day = curr_datetime.day
+    curr_hour = curr_datetime.hour
+    curr_minute = curr_datetime.minute
+
+    experiment_desc = f'{curr_day}-{curr_month}-{curr_hour}:{curr_minute}-job'
+
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('processes', type=int, nargs='+',
+                        help='Number of allocated processes')
+    parser.add_argument('--src_file', type=str,
+                        help='Path to source file')
+    parser.add_argument('--exec_file', type=str, default='exec',
+                        help='Name of executable after compilation')
+    parser.add_argument('--experiment', type=str, default=experiment_desc,
+                        help='Experiment name')
+    parser.add_argument('--results', type=str, default='results.csv',
+                        help='Filename to save results to')
+    return parser
