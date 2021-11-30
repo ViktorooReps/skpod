@@ -5,7 +5,7 @@ from matplotlib.colors import LogNorm
 import dataframe_image as dfi
 
 if __name__ == '__main__':
-    data = pd.read_csv('openmp/data/data.csv', sep='\t')
+    data = pd.read_csv('openmp/data/polus/data.csv', sep='\t')
     data = data[data['n'] > 2]
     small_data = data[data['n'] < 2 ** 6]
     big_data = data[data['n'] > 2 ** 7]
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     plt.show()
 
     data = data.pivot("n", "threads", "time")
-    dfi.export(data, 'openmp/graphs/table.png')
+    dfi.export(data, 'openmp/graphs/polus/table.png')
 
     ax = sns.heatmap(data, norm=LogNorm(), square=True)
     ax.set_title('Execution time in seconds with nxn matrix')
