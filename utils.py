@@ -1,6 +1,5 @@
 import logging
 import os
-import subprocess
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import datetime
 from time import sleep
@@ -22,7 +21,7 @@ def xlc_compile(src_filename, args):
     logger.info('Compiling ' + src_filename + '...')
 
     args = ['xlc'] + list(args) + [str(src_filename)]
-    subprocess.run(args)
+    os.system(' '.join(args))
 
     logger.info('Compilation finished')
 
@@ -48,7 +47,7 @@ def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
     else:
         raise ValueError
 
-    subprocess.run(args)
+    os.system(' '.join(args))
 
     logger.info('Job ' + res_filename + ' scheduled!')
 
