@@ -82,7 +82,7 @@ main(int argc, char **argv)
     }
 
     double **matrix;
-    int n[11] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048};
+    int n[13] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192};
     int threads;
     sscanf(argv[1], "%d", &threads);
     double timer_omp, avg_time, maxval;
@@ -91,7 +91,7 @@ main(int argc, char **argv)
     {
         avg_time = 0.0;
         maxval = 100000.0 / n[i] / n[i];
-        int runs = 5 * (11 - i);
+        int runs = 10;
         for (int k = 0; k < runs; k++)
         {
             matrix = init_matrix(n[i], maxval);
