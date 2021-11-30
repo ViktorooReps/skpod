@@ -81,7 +81,7 @@ def collect_results(res_filename: str) -> str:
 
 
 def save_results(dest: PathLike, results: Iterable[str]):
-    combined_results = '\n'.join(results)
+    combined_results = ''.join(results)
     with open(dest, 'w') as f:
         f.write(combined_results)
 
