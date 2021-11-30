@@ -11,7 +11,7 @@ if __name__ == '__main__':
     arg_parser = create_parser()
     args = arg_parser.parse_args()
 
-    compile_args = ['-qsmp=omp', '-lpthread', '-o', args.exec_file]
+    compile_args = ['-qsmp=omp', '-qthreaded', '-lpthread', '-o', args.exec_file]
     xlc_compile(Machine.BLUEGENE, args.src_file, compile_args)
 
     results = []

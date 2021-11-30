@@ -19,7 +19,7 @@ class Machine:
 
 def xlc_compile(machine, src_filename, args):
     logger.info('Compiling ' + src_filename + '...')
-    compiler = 'xlc' if machine == Machine.POLUS else 'mpixlc'
+    compiler = 'xlc' if machine == Machine.POLUS else 'mpixlc_r'
     args = [compiler] + list(args) + [str(src_filename)]
     os.system(' '.join(args))
 
