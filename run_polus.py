@@ -12,7 +12,7 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
 
     compile_args = ['-qsmp=omp', '-o', args.exec_file]
-    xlc_compile(args.src_file, compile_args)
+    xlc_compile(Machine.POLUS, args.src_file, compile_args)
 
     results = []
     for n_proc in args.processes:

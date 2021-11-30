@@ -17,10 +17,10 @@ class Machine:
     BLUEGENE = 'bluegene'
 
 
-def xlc_compile(src_filename, args):
+def xlc_compile(machine, src_filename, args):
     logger.info('Compiling ' + src_filename + '...')
-
-    args = ['xlc'] + list(args) + [str(src_filename)]
+    compiler = 'xlc' if machine == Machine.POLUS else 'mpicc'
+    args = [compiler] + list(args) + [str(src_filename)]
     os.system(' '.join(args))
 
     logger.info('Compilation finished')
