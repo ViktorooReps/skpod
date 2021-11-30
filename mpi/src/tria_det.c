@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <float.h>
-#include <omp.h>
+#include <mpi.h>
 
 void
 mult_row_from_idx(double *row, double num, size_t row_len, size_t from_idx)
@@ -24,9 +24,8 @@ double
 det(double **matrix, size_t len, size_t threads)
 {
     double det = 1.0;
-
+    
     int diag_idx, c_idx;
-#pragma omp parallel for private(r_idx, c_idx) shared(matrix, det) num_threads(threads)
     for (diag_idx = 0; diag_idx < len; ++r_idx) {
         // reset all elements before diagonal to zero
         for (c_idx = 0; c_idx < diag_idx; ++c_idx) {
@@ -64,7 +63,7 @@ init_matrix(int n, double maxval)
     return matrix;
 }
 
-void
+void 
 free_matrix(double **matrix, int n)
 {
     for (size_t i = 0; i < n; i++)
@@ -80,8 +79,8 @@ main()
     double **matrix;
     int n[11] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048};
     int threads[8] = {1, 2, 4, 8, 16, 32, 64, 128};
-    double timer_omp, avg_time, maxval;
-    printf("size\tn_thread\taverage_time\n");
+    double timer_mpi, avg_time, maxval;
+    printf("size\tn_threads\taverage_time\n");
     for (int i = 0; i < 11; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -93,9 +92,9 @@ main()
             {
                 matrix = init_matrix(n[i], maxval);
 
-                timer_omp = omp_get_wtime();
+                timer_mpi = MPI_Wtime();
                 double d = det(matrix, n[i], threads[j]);
-                avg_time += omp_get_wtime() - timer_omp;
+                avg_time += MPI_Wtime() - timer_mpi;
             }
             avg_time /= (double)runs;
             printf("%d\t%d\t%f\n", n[i], threads[j], avg_time);
