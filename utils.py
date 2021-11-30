@@ -25,7 +25,7 @@ def xlc_compile(src_filename, args):
     args = ['xlc'] + list(args) + [str(src_filename)]
     subprocess.run(args)
 
-    logger.info(f'Compilation finished')
+    logger.info('Compilation finished')
 
 
 def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
@@ -51,19 +51,19 @@ def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
 
     subprocess.run(args)
 
-    logger.info('Job' + 'res_filename' + 'scheduled!')
+    logger.info('Job ' + res_filename + ' scheduled!')
 
 
 def wait(res_filename):
     out_file = res_filename + '.out'
     err_file = res_filename + '.err'
 
-    logger.info(f'Waiting for ' + res_filename + ' job...')
+    logger.info('Waiting for ' + res_filename + ' job...')
 
     while not (os.path.isfile(out_file) or os.path.isfile(err_file)):
         sleep(1)
 
-    logger.info(f'Job ' + res_filename + ' finished!')
+    logger.info('Job ' + res_filename + ' finished!')
 
 
 def collect_results(res_filename) -> str:
