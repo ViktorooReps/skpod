@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
 from typing import List
 
 from utils import create_parser, xlc_compile, schedule, Machine, wait, collect_results, save_results
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+
     arg_parser = create_parser()
     args = arg_parser.parse_args()
 

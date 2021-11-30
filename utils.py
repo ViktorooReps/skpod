@@ -35,14 +35,14 @@ def schedule(machine: Machine, n_processes: int, exec_file: PathLike, res_filena
                 '--stdout', res_filename + '.out',
                 '--stderr', res_filename + '.err',
                 str(exec_file),
-                '--', n_processes]
+                '--', str(n_processes)]
     elif machine == Machine.BLUEGENE:
         args = ['mpisubmit.bg',
                 '--nproc', str(n_processes),
                 '--stdout', res_filename + '.out',
                 '--stderr', res_filename + '.err',
                 str(exec_file),
-                '--', n_processes]
+                '--', str(n_processes)]
     else:
         raise ValueError
 
