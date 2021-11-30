@@ -3,7 +3,6 @@ import os
 import subprocess
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import datetime
-from enum import Enum
 from time import sleep
 
 
@@ -14,7 +13,7 @@ class NoOutputException(Exception):
     pass
 
 
-class Machine(Enum):
+class Machine:
     POLUS = 'polus'
     BLUEGENE = 'bluegene'
 
