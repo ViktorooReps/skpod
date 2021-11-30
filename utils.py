@@ -9,7 +9,7 @@ from time import sleep
 from typing import Iterable, List
 
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class NoOutputException(Exception):
@@ -22,8 +22,12 @@ class Machine(Enum):
 
 
 def xlc_compile(src_filename: PathLike, args: Iterable[str] = tuple()):
+    logger.info(f'Compiling {src_filename}...')
+
     args: List[str] = ['xlc'] + list(args) + [str(src_filename)]
     subprocess.run(args)
+
+    logger.info(f'Compilation finished')
 
 
 def schedule(machine: Machine, n_processes: int, exec_file: PathLike, res_filename: str):
