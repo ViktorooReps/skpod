@@ -107,6 +107,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 MPI_Send(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD);
 
                 assigned_row += slave_threads;
+                curr_tag += 1;
             }
 
             free(compute_row);
