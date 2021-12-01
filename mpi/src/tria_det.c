@@ -90,6 +90,8 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
             free(requests);
         } else {
+            int total_requests = len / slave_threads + (int)(rank < len);
+
             int col_idx = diag_idx;
             int assigned_row = rank;
             double *compute_row = malloc(sizeof(double) * len);
