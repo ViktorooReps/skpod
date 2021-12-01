@@ -31,7 +31,7 @@ mpi__in_thread_group(int rank, int mpi__thread_group, int mpi__thread_group_len)
     int mpi__thread_group_start = mpi__thread_group * mpi__thread_group_len;
     int mpi__thread_group_end = mpi__thread_group_start + mpi__thread_group_len;
 
-    return ((rank >= mpi__thread_group_start) && (rank < mpi__thread_group_end))
+    return ((rank >= mpi__thread_group_start) && (rank < mpi__thread_group_end));
 }
 
 double
@@ -200,7 +200,7 @@ main(int argc, char **argv)
             double d = det(matrix, n[i], threads, rank);
             avg_time += MPI_Wtime() - timer_mpi;
         }
-        avg_time /= (double)runs;
+        avg_time /= (double)N_RUNS;
 
         if (!rank) {
             printf("%d\t%d\t%f\n", n[i], threads, avg_time);
