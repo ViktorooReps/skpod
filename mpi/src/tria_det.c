@@ -4,11 +4,11 @@
 #include <float.h>
 #include <mpi.h>
 
-#define N_RUNS 1
-#define N_MATRIX_LENS 8
-#define SEED 42
-#define MAX_DET_VALUE 10000.0
-#define MASTER_RANK 0
+//#define N_RUNS 1
+//#define N_MATRIX_LENS 8
+//#define SEED 42
+//#define MAX_DET_VALUE 10000.0
+//#define MASTER_RANK 0
 
 void
 mult_row_from_idx(double *row, double num, size_t row_len, size_t from_idx)
