@@ -47,7 +47,7 @@ mpi__mult_row_from_idx(double *row, double num, size_t row_len, int from_idx, in
         int mpi__end_elem = mpi__start_elem + mpi__elems_per_thread;
 
         if (mpi__in_group_rank == mpi__new_group_len - 1) {
-            mpi__end_elem = row_len - 1;
+            mpi__end_elem = row_len - from_idx - 1;
         }
 
         for (int elem_idx = mpi__start_elem; elem_idx < mpi__end_elem; ++elem_idx) {
@@ -71,7 +71,7 @@ mpi__add_row_from_idx(double *row_dest, double *row_to_add, size_t row_len, int 
         int mpi__end_elem = mpi__start_elem + mpi__elems_per_thread;
 
         if (mpi__in_group_rank == mpi__new_group_len - 1) {
-            mpi__end_elem = row_len - 1;
+            mpi__end_elem = row_len - from_idx - 1;
         }
 
         for (int elem_idx = mpi__start_elem; elem_idx < mpi__end_elem; ++elem_idx) {
