@@ -74,8 +74,11 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             // send data to slave processes and make data requests
             for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
                 dest = (row_idx - 1) % slave_threads + 1;
+                printf("sent %d row to %d rank", row_idx, dest);
+
                 MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, requests + curr_req_idx);
                 curr_req_idx += 1;
+
                 MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, requests + curr_req_idx);
                 curr_req_idx += 1;
             }
@@ -92,6 +95,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             while (assigned_row < len) {
                 // receive data from master process
                 MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, 0, MPI_COMM_WORLD);
+                printf("%d rank received row", rank);
 
                 // reset (assigned_row, col_idx) element to zero
                 double elem = compute_row[col_idx];
@@ -101,6 +105,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
                 // send modified data back to master
                 MPI_Send(compute_row, len, MPI_DOUBLE, MASTER_RANK, 0, MPI_COMM_WORLD);
+                printf("%d rank sent row", rank);
 
                 assigned_row += slave_threads;
             }
