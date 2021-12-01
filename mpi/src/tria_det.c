@@ -87,12 +87,12 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 {
     double det = 1.0;
 
-    for (int diag_idx = 0; diag_idx < len; ++r_idx) {
+    for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
         MPI_Barrier(MPI_COMM_WORLD);
 
         // reset to 1.0 diagonal element
         double diag = matrix[diag_idx][diag_idx];
-        mpi__mult_row_from_idx(matrix[diag_idx], 1.0 / diag, len, diag_idx, 0, threads, rank)
+        mpi__mult_row_from_idx(matrix[diag_idx], 1.0 / diag, len, diag_idx, 0, threads, rank);
         if (!rank) {
             det *= diag;
         }
@@ -135,13 +135,13 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
     }
 
     double res = 1.0;
-    MPI_Reduce(&det, &res, cSz, MPI_DOUBLE, MPI_PROD, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, 0, MPI_COMM_WORLD);
 
     return res;
 }
 
 void
-init_matrix(double **matrix, double maxval)
+init_matrix(double **matrix, size_t n, double maxval)
 {
     for (size_t i = 0; i < n; i++) {
         for (size_t j = 0; j < n; j++) {
@@ -151,7 +151,7 @@ init_matrix(double **matrix, double maxval)
 }
 
 double **
-create_matrix(int n)
+create_matrix(size_t n)
 {
     double **matrix = malloc(sizeof(double *) * n);
     for (size_t i = 0; i < n; i++) {
@@ -161,7 +161,7 @@ create_matrix(int n)
 }
 
 void 
-free_matrix(double **matrix, int n)
+free_matrix(double **matrix, size_t n)
 {
     for (size_t i = 0; i < n; i++) {
         free(matrix[i]);
@@ -192,7 +192,7 @@ main(int argc, char **argv)
         maxval = MAX_DET_VALUE / n[i] / n[i];
         for (int k = 0; k < N_RUNS; k++) {
             if (!rank) {
-                init_matrix(matrix, maxval);
+                init_matrix(matrix, n[i], maxval);
             }
 
             MPI_Barrier(MPI_COMM_WORLD);
