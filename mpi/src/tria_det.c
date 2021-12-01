@@ -153,7 +153,7 @@ free_matrix(double **matrix, size_t n)
 int
 main(int argc, char **argv)
 {
-    srand(SEED);
+    //srand(SEED);
 
     MPI_Init(NULL, NULL);
 
