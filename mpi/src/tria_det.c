@@ -55,6 +55,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
     double det = 1.0, res = 1.0;
 
     double *diag_row = malloc(sizeof(double) * len);
+    double *compute_row = malloc(sizeof(double) * len);
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
         if (!rank) {
             diag_row = matrix[diag_idx];
@@ -92,7 +93,6 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             int curr_tag = 0;
             int col_idx = diag_idx;
             int assigned_row = rank;
-            double *compute_row = malloc(sizeof(double) * len);
             while (assigned_row < len) {
                 // receive data from master process
                 MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -109,14 +109,14 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 assigned_row += slave_threads;
                 curr_tag += 1;
             }
-
-            free(compute_row);
         }
 
     }
 
     free(diag_row);
+    free(compute_row);
 
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, 0, MPI_COMM_WORLD);
 
     return res;
@@ -182,8 +182,10 @@ main(int argc, char **argv)
             timer_mpi = MPI_Wtime();
 
             double d
-            if (threads == 1) {
-                d = det(matrix, n[i]);
+            if (threads < 4) {
+                if (!rank) {
+                    d = det(matrix, n[i]);
+                }
             } else {
                 d = mpi__det(matrix, n[i], threads, rank);
             }
