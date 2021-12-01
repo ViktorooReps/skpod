@@ -64,12 +64,12 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             det *= diag_elem;
         }
 
-        MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        //MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, MPI_COMM_WORLD);
         int slave_threads = threads - 1;
 
         if (!rank) {
             int total_requests = (len - diag_idx - 1) * 2;
-            MPI_Request *requests = malloc(sizeof(MPI_Request) * total_requests);
+            //MPI_Request *requests = malloc(sizeof(MPI_Request) * total_requests);
 
             int curr_req_idx = 0, dest, curr_tag;
             // send data to slave processes and make data requests
@@ -88,7 +88,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 //MPI_Wait(requests + req_idx, MPI_STATUS_IGNORE);
             }
 
-            free(requests);
+            //free(requests);
         } else {
             int curr_tag = 0;
             int col_idx = diag_idx;
@@ -116,7 +116,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
     free(diag_row);
     free(compute_row);
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
     //MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, MPI_COMM_WORLD);
 
     return res;
