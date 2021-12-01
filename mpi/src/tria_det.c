@@ -98,10 +98,10 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 //MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
                 // reset (assigned_row, col_idx) element to zero
-                double elem = compute_row[col_idx];
-                mult_row_from_idx(compute_row, -1.0 / elem, len, col_idx);
-                det *= -1.0 * elem;
-                add_row_from_idx(compute_row, diag_row, len, col_idx);
+                //double elem = compute_row[col_idx];
+                //mult_row_from_idx(compute_row, -1.0 / elem, len, col_idx);
+                //det *= -1.0 * elem;
+                //add_row_from_idx(compute_row, diag_row, len, col_idx);
 
                 // send modified data back to master
                 //MPI_Send(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD);
