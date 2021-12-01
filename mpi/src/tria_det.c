@@ -34,7 +34,7 @@ mpi__in_thread_group(int rank, int mpi__thread_group, int mpi__thread_group_len)
     return ((rank >= mpi__thread_group_start) && (rank < mpi__thread_group_end));
 }
 
-double
+void
 mpi__mult_row_from_idx(double *row, double num, size_t row_len, int from_idx, int mpi__thread_group, int mpi__thread_group_len, int rank)
 {
     int proc_len = row_len - from_idx;
@@ -58,7 +58,7 @@ mpi__mult_row_from_idx(double *row, double num, size_t row_len, int from_idx, in
     }
 }
 
-double
+void
 mpi__add_row_from_idx(double *row_dest, double *row_to_add, size_t row_len, int from_idx, int mpi__thread_group, int mpi__thread_group_len, int rank)
 {
     int proc_len = row_len - from_idx;
@@ -197,7 +197,7 @@ main(int argc, char **argv)
 
             MPI_Barrier(MPI_COMM_WORLD);
             timer_mpi = MPI_Wtime();
-            double d = det(matrix, n[i], threads, rank);
+            double d = mpi__det(matrix, n[i], threads, rank);
             avg_time += MPI_Wtime() - timer_mpi;
         }
         avg_time /= (double)N_RUNS;
