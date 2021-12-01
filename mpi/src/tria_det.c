@@ -4,6 +4,11 @@
 #include <float.h>
 #include <mpi.h>
 
+#define N_RUNS 10
+#define N_MATRIX_LENS 10
+#define SEED 42
+#define MAX_DET_VALUE 10000.0
+
 void
 mult_row_from_idx(double *row, double num, size_t row_len, size_t from_idx)
 {
@@ -166,20 +171,15 @@ free_matrix(double **matrix, int n)
 int
 main(int argc, char **argv)
 {
-    srand(42);
-    if (argc != 2) {
-        return -1;
-    }
+    srand(SEED);
 
     MPI_Init(&argc, &argv);
 
     int threads, rank;
-
     MPI_Comm_size(MPI_COMM_WORLD, &threads);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    double **matrix = create_matrix();
-    int n[10] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+    int n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
 
     double timer_mpi, avg_time, maxval;
     if (!rank) {
@@ -187,10 +187,10 @@ main(int argc, char **argv)
     }
 
     for (int i = 0; i < 10; i++) {
+        double **matrix = create_matrix(n[i]);
         avg_time = 0.0;
-        maxval = 100000.0 / n[i] / n[i];
-        int runs = 10;
-        for (int k = 0; k < runs; k++) {
+        maxval = MAX_DET_VALUE / n[i] / n[i];
+        for (int k = 0; k < N_RUNS; k++) {
             if (!rank) {
                 init_matrix(matrix, maxval);
             }
