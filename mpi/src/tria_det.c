@@ -71,15 +71,11 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             MPI_Request *requests = malloc(sizeof(MPI_Request) * total_requests);
 
             int curr_req_idx = 0, dest;
-            // send data to slave processes
+            // send data to slave processes and make data requests
             for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
                 dest = row_idx % slave_threads + 1;
                 MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, requests + curr_req_idx);
                 curr_req_idx += 1;
-            }
-            // receive data from slave processes
-            for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
-                dest = row_idx % slave_threads + 1;
                 MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, requests + curr_req_idx);
                 curr_req_idx += 1;
             }
@@ -90,9 +86,6 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
             free(requests);
         } else {
-            int total_requests = len / slave_threads + (int)(rank < len);
-            MPI_Request *requests = malloc(sizeof(MPI_Request) * total_requests);
-
             int curr_req = 0;
             int col_idx = diag_idx;
             int assigned_row = rank;
@@ -108,18 +101,13 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 add_row_from_idx(compute_row, diag_row, len, col_idx);
 
                 // send modified data back to master
-                MPI_Isend(compute_row, len, MPI_DOUBLE, MASTER_RANK, 0, MPI_COMM_WORLD, requests + curr_req);
+                MPI_Send(compute_row, len, MPI_DOUBLE, MASTER_RANK, 0, MPI_COMM_WORLD);
                 curr_req += 1;
 
                 assigned_row += slave_threads;
             }
-            // wait for requests completion
-            for (int req_idx = 0; req_idx < total_requests; ++req_idx) {
-                MPI_Wait(requests + req_idx, MPI_STATUS_IGNORE);
-            }
 
             free(compute_row);
-            free(requests);
         }
 
     }
