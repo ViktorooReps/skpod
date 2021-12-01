@@ -94,6 +94,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             double *compute_row = malloc(sizeof(double) * len);
             while (assigned_row < len) {
                 // receive data from master process
+                printf("%d rank waiting for row", rank);
                 MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, 0, MPI_COMM_WORLD);
                 printf("%d rank received row", rank);
 
