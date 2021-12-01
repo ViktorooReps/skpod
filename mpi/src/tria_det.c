@@ -77,15 +77,15 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 dest = (row_idx - 1) % slave_threads + 1;
                 curr_tag = (row_idx - 1) / slave_threads;
 
-                MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, requests + curr_req_idx);
+                //MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, requests + curr_req_idx);
                 curr_req_idx += 1;
 
-                MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, requests + curr_req_idx);
+                //MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, requests + curr_req_idx);
                 curr_req_idx += 1;
             }
             // wait for requests completion
             for (int req_idx = 0; req_idx < total_requests; ++req_idx) {
-                MPI_Wait(requests + req_idx, MPI_STATUS_IGNORE);
+                //MPI_Wait(requests + req_idx, MPI_STATUS_IGNORE);
             }
 
             free(requests);
@@ -95,7 +95,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             int assigned_row = rank;
             while (assigned_row < len) {
                 // receive data from master process
-                MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                //MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
                 // reset (assigned_row, col_idx) element to zero
                 double elem = compute_row[col_idx];
@@ -104,7 +104,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 add_row_from_idx(compute_row, diag_row, len, col_idx);
 
                 // send modified data back to master
-                MPI_Send(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD);
+                //MPI_Send(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD);
 
                 assigned_row += slave_threads;
                 curr_tag += 1;
