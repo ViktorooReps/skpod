@@ -117,7 +117,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
     free(compute_row);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, 0, MPI_COMM_WORLD);
+    //MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, MPI_COMM_WORLD);
 
     return res;
 }
