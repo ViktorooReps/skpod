@@ -23,16 +23,16 @@ def mpixlc_compile(src_filename, args):
     args = [compiler] + list(args) + [str(src_filename)]
     res = os.system(' '.join(args))
 
-    logger.info('Compilation finished' + str(res))
+    logger.info('Compilation finished ' + str(res))
 
 
 def xlc_compile(src_filename, args):
-    logger.info('Compiling ' + src_filename + ' with ' + str(args) + ' arguments...')
     compiler = 'xlc_r'
     args = [compiler] + list(args) + [str(src_filename)]
-    os.system(' '.join(args))
 
-    logger.info('Compilation finished')
+    logger.info('Compiling ' + src_filename + ' with ' + str(args) + ' arguments...')
+    os.system(' '.join(args))
+    logger.info('Compilation finished ' + str(res))
 
 
 def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
