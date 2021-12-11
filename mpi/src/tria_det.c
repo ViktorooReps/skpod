@@ -54,8 +54,14 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 {
     double det = 1.0, res = 1.0;
 
-    double *diag_row = malloc(sizeof(double) * len);
-    double *compute_row = malloc(sizeof(double) * len);
+    double *diag_row;
+    double *compute_row;
+
+    if (rank) {
+        compute_row = malloc(sizeof(double) * len);
+        diag_row = malloc(sizeof(double) * len);
+    }
+
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
         if (!rank) {
             diag_row = matrix[diag_idx];
@@ -111,8 +117,10 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         }
     }
 
-    free(diag_row);
-    free(compute_row);
+    if (rank) {
+        free(diag_row);
+        free(compute_row);
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, MPI_COMM_WORLD);
@@ -168,7 +176,10 @@ main(int argc, char **argv)
     }
 
     for (int i = 0; i < N_MATRIX_LENS; i++) {
-        double **matrix = create_matrix(n[i]);
+        double **matrix;
+        if (!rank) {
+            matrix = create_matrix(n[i]);
+        }
         avg_time = 0.0;
         maxval = MAX_DET_VALUE / n[i] / n[i];
         for (int k = 0; k < N_RUNS; k++) {
@@ -195,8 +206,8 @@ main(int argc, char **argv)
 
         if (!rank) {
             printf("%d\t%d\t%f\n", n[i], threads, avg_time);
+            free_matrix(matrix, n[i]);
         }
-        free_matrix(matrix, n[i]);
     }
     if (!rank) {
         printf("<OUTPUT>");
