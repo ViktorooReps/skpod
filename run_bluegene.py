@@ -1,4 +1,6 @@
 import logging
+import os
+
 import sys
 
 from utils import create_parser, xlc_compile, schedule, Machine, wait, collect_results, save_results, mpixlc_compile
@@ -16,6 +18,9 @@ if __name__ == '__main__':
         mpixlc_compile(args.src_file, compile_args)
     else:
         xlc_compile(args.src_file, compile_args)
+
+    if not os.path.exists(args.exec_file):
+        raise ValueError('Compilation failed!')
 
     results = []
     for n_proc in args.processes:
