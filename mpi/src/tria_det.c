@@ -157,7 +157,7 @@ main(int argc, char **argv)
 
     MPI_Init(*argc, *argv);
 
-    printf("Hi!")
+    printf("Hi!");
 
 //    int threads, rank;
 //    MPI_Comm_size(MPI_COMM_WORLD, &threads);
