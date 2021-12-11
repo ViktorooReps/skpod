@@ -4,6 +4,12 @@
 #include <float.h>
 #include <omp.h>
 
+#define N_RUNS 10
+#define N_MATRIX_LENS 10
+#define SEED 42
+#define MAX_DET_VALUE 10000.0
+#define MASTER_RANK 0
+
 void
 mult_row_from_idx(double *row, double num, size_t row_len, size_t from_idx)
 {
@@ -82,17 +88,16 @@ main(int argc, char **argv)
     }
 
     double **matrix;
-    int n[10] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+    int n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
     int threads;
     sscanf(argv[1], "%d", &threads);
     double timer_omp, avg_time, maxval;
     printf("<OUTPUT>");
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < N_MATRIX_LENS; i++)
     {
         avg_time = 0.0;
-        maxval = 100000.0 / n[i] / n[i];
-        int runs = 10;
-        for (int k = 0; k < runs; k++)
+        maxval = MAX_DET_VALUE / n[i] / n[i];
+        for (int k = 0; k < N_RUNS; k++)
         {
             matrix = init_matrix(n[i], maxval);
 
@@ -100,7 +105,7 @@ main(int argc, char **argv)
             double d = det(matrix, n[i], threads);
             avg_time += omp_get_wtime() - timer_omp;
         }
-        avg_time /= (double)runs;
+        avg_time /= (double)N_RUNS;
         printf("%d\t%d\t%f\n", n[i], threads, avg_time);
         free_matrix(matrix, n[i]);
     }
