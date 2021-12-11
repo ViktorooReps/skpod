@@ -17,9 +17,18 @@ class Machine:
     BLUEGENE = 'bluegene'
 
 
+def mpixlc_compile(src_filename, args):
+    logger.info('Compiling ' + src_filename + '...')
+    compiler = 'mpixlc'
+    args = [compiler] + list(args) + [str(src_filename)]
+    os.system(' '.join(args))
+
+    logger.info('Compilation finished')
+
+
 def xlc_compile(src_filename, args):
     logger.info('Compiling ' + src_filename + '...')
-    compiler = 'mpixlc_r'
+    compiler = 'xlc_r'
     args = [compiler] + list(args) + [str(src_filename)]
     os.system(' '.join(args))
 

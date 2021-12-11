@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from utils import create_parser, xlc_compile, schedule, Machine, wait, collect_results, save_results
+from utils import create_parser, xlc_compile, schedule, Machine, wait, collect_results, save_results, mpixlc_compile
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s',
@@ -12,7 +12,10 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
 
     compile_args = ['-qsmp=omp', '-qthreaded', '-lpthread', '-o', args.exec_file]
-    xlc_compile(Machine.BLUEGENE, args.src_file, compile_args)
+    if args.mpi:
+        mpixlc_compile(args.src_file, compile_args)
+    else:
+        xlc_compile(args.src_file, compile_args)
 
     results = []
     for n_proc in args.processes:

@@ -150,7 +150,6 @@ free_matrix(double **matrix, size_t n)
     }
 }
 
-/*
 int
 main(int argc, char **argv)
 {
@@ -205,14 +204,5 @@ main(int argc, char **argv)
     }
     MPI_Finalize();
     return 0;
-}*/
-
-int
-main(int argc, char **argv)
-{
-    printf("wtf");
-    MPI_Init(&argc, &argv);
-    printf("wtf??");
-    MPI_Finalize();
 }
 
