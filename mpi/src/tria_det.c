@@ -100,6 +100,9 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             int curr_tag = 0;
             int col_idx = diag_idx;
             int assigned_row = rank;
+            while (assigned_row <= diag_idx) {
+                assigned_row += slave_threads;
+            }
             while (assigned_row < len) {
                 printf("slave %d ready to receive %d row with tag %d\n", rank, assigned_row, curr_tag);
                 // receive data from master process
