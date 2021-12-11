@@ -181,7 +181,7 @@ main(int argc, char **argv)
 
             timer_mpi = MPI_Wtime();
 
-            double d
+            double d;
             if (threads < 4) {
                 if (!rank) {
                     d = det(matrix, n[i]);
