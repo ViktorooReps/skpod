@@ -157,9 +157,9 @@ main(int argc, char **argv)
 
     MPI_Init(&argc, &argv);
 
-//    int threads, rank;
-//    MPI_Comm_size(MPI_COMM_WORLD, &threads);
-//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int threads, rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &threads);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 //
 //    int n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256};
 //
