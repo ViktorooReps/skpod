@@ -5,38 +5,75 @@ from matplotlib.colors import LogNorm
 import dataframe_image as dfi
 
 if __name__ == '__main__':
-    data = pd.read_csv('openmp/data/polus/data.csv', sep='\t')
-    data = data[data['n'] > 2]
-    small_data = data[data['n'] < 2 ** 6]
-    big_data = data[data['n'] > 2 ** 7]
 
-    palette = sns.color_palette("flare", 8)
+    # creating graphs for openmp from polus
+
+    data_openmp = pd.read_csv('openmp/data/polus/data.csv', sep='\t')
+    data_openmp = data_openmp[data_openmp['n'] > 2]
+    small_data = data_openmp[data_openmp['n'] < 2 ** 6]
+    big_data = data_openmp[data_openmp['n'] > 2 ** 7]
+
+    palette = sns.color_palette("flare", 7)
     sns.set()
 
-    ax = sns.lineplot(data=data, x='n', y='time', hue='threads', palette=palette)
+    ax = sns.lineplot(data=data_openmp, x='n', y='time', hue='threads', palette=palette)
     ax.set_title('Execution time in seconds with nxn matrix')
     ax.set_xscale('log', basex=2)
-    plt.savefig('openmp/graphs/lineplot.png')
+    plt.savefig('openmp/graphs/polus/lineplot.png')
     plt.show()
 
     ax = sns.lineplot(data=small_data, x='n', y='time', hue='threads', palette=palette)
     ax.set_title('Execution time in seconds with nxn matrix on smaller n')
     ax.set_xscale('log', basex=2)
-    plt.savefig('openmp/graphs/lineplot_small.png')
+    plt.savefig('openmp/graphs/polus/lineplot_small.png')
     plt.show()
 
     ax = sns.lineplot(data=big_data, x='n', y='time', hue='threads', palette=palette)
     ax.set_title('Execution time in seconds with nxn matrix on larger n')
     ax.set_xscale('log', basex=2)
-    plt.savefig('openmp/graphs/lineplot_big.png')
+    plt.savefig('openmp/graphs/polus/lineplot_big.png')
     plt.show()
 
-    data = data.pivot("n", "threads", "time")
-    dfi.export(data, 'openmp/graphs/polus/table.png')
+    data_openmp = data_openmp.pivot("n", "threads", "time")
+    dfi.export(data_openmp, 'openmp/graphs/polus/table.png')
 
-    ax = sns.heatmap(data, norm=LogNorm(), square=True)
+    ax = sns.heatmap(data_openmp, norm=LogNorm(), square=True)
     ax.set_title('Execution time in seconds with nxn matrix')
-    plt.savefig('openmp/graphs/heatmap.png')
+    plt.savefig('openmp/graphs/polus/heatmap.png')
     plt.show()
 
+    # creating graphs for mpi from polus
 
+    data_mpi = pd.read_csv('mpi/data/polus/data.csv', sep='\t')
+    data_mpi = data_mpi[data_mpi['n'] > 2]
+    small_data = data_mpi[data_mpi['n'] < 2 ** 6]
+    big_data = data_mpi[data_mpi['n'] > 2 ** 7]
+
+    palette = sns.color_palette("flare", 7)
+    sns.set()
+
+    ax = sns.lineplot(data=data_mpi, x='n', y='time', hue='processes', palette=palette)
+    ax.set_title('Execution time in seconds with nxn matrix')
+    ax.set_xscale('log', basex=2)
+    plt.savefig('mpi/graphs/polus/lineplot.png')
+    plt.show()
+
+    ax = sns.lineplot(data=small_data, x='n', y='time', hue='processes', palette=palette)
+    ax.set_title('Execution time in seconds with nxn matrix on smaller n')
+    ax.set_xscale('log', basex=2)
+    plt.savefig('mpi/graphs/polus/lineplot_small.png')
+    plt.show()
+
+    ax = sns.lineplot(data=big_data, x='n', y='time', hue='processes', palette=palette)
+    ax.set_title('Execution time in seconds with nxn matrix on larger n')
+    ax.set_xscale('log', basex=2)
+    plt.savefig('mpi/graphs/polus/lineplot_big.png')
+    plt.show()
+
+    data_mpi = data_mpi.pivot("n", "processes", "time")
+    dfi.export(data_mpi, 'mpi/graphs/polus/table.png')
+
+    ax = sns.heatmap(data_mpi, norm=LogNorm(), square=True)
+    ax.set_title('Execution time in seconds with nxn matrix')
+    plt.savefig('mpi/graphs/polus/heatmap.png')
+    plt.show()
