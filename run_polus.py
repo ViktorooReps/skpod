@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     if args.mpi:
         compile_args = ['-o', args.exec_file]
-        mpixlc_compile(args.src_file, [])
+        mpixlc_compile(args.src_file, compile_args)
     else:
         compile_args = ['-qsmp=omp', '-o', args.exec_file]
         xlc_compile(args.src_file, compile_args)
