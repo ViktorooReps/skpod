@@ -157,51 +157,51 @@ main(int argc, char **argv)
 
     MPI_Init(&argc, &argv);
 
-    int threads, rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &threads);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    int n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256};
-
-    double timer_mpi, avg_time, maxval;
-    if (!rank) {
-        printf("<OUTPUT>");
-    }
-
-    for (int i = 0; i < 10; i++) {
-        double **matrix = create_matrix(n[i]);
-        avg_time = 0.0;
-        maxval = MAX_DET_VALUE / n[i] / n[i];
-        for (int k = 0; k < N_RUNS; k++) {
-            if (!rank) {
-                init_matrix(matrix, n[i], maxval);
-            }
-
-            MPI_Barrier(MPI_COMM_WORLD);
-
-            timer_mpi = MPI_Wtime();
-
-            double d;
-            if (threads < 4) {
-                if (!rank) {
-                    d = det(matrix, n[i]);
-                }
-            } else {
-                d = mpi__det(matrix, n[i], threads, rank);
-            }
-
-            avg_time += MPI_Wtime() - timer_mpi;
-        }
-        avg_time /= (double)N_RUNS;
-
-        if (!rank) {
-            printf("%d\t%d\t%f\n", n[i], threads, avg_time);
-        }
-        free_matrix(matrix, n[i]);
-    }
-    if (!rank) {
-        printf("<OUTPUT>");
-    }
+//    int threads, rank;
+//    MPI_Comm_size(MPI_COMM_WORLD, &threads);
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//
+//    int n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256};
+//
+//    double timer_mpi, avg_time, maxval;
+//    if (!rank) {
+//        printf("<OUTPUT>");
+//    }
+//
+//    for (int i = 0; i < 10; i++) {
+//        double **matrix = create_matrix(n[i]);
+//        avg_time = 0.0;
+//        maxval = MAX_DET_VALUE / n[i] / n[i];
+//        for (int k = 0; k < N_RUNS; k++) {
+//            if (!rank) {
+//                init_matrix(matrix, n[i], maxval);
+//            }
+//
+//            MPI_Barrier(MPI_COMM_WORLD);
+//
+//            timer_mpi = MPI_Wtime();
+//
+//            double d;
+//            if (threads < 4) {
+//                if (!rank) {
+//                    d = det(matrix, n[i]);
+//                }
+//            } else {
+//                d = mpi__det(matrix, n[i], threads, rank);
+//            }
+//
+//            avg_time += MPI_Wtime() - timer_mpi;
+//        }
+//        avg_time /= (double)N_RUNS;
+//
+//        if (!rank) {
+//            printf("%d\t%d\t%f\n", n[i], threads, avg_time);
+//        }
+//        free_matrix(matrix, n[i]);
+//    }
+//    if (!rank) {
+//        printf("<OUTPUT>");
+//    }
     MPI_Finalize();
     return 0;
 }
