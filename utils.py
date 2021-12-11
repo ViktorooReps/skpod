@@ -21,9 +21,9 @@ def mpixlc_compile(src_filename, args):
     logger.info('Compiling ' + src_filename + ' with ' + str(args) + ' arguments...')
     compiler = 'mpixlc'
     args = [compiler] + list(args) + [str(src_filename)]
-    os.system(' '.join(args))
+    res = os.system(' '.join(args))
 
-    logger.info('Compilation finished')
+    logger.info('Compilation finished' + str(res))
 
 
 def xlc_compile(src_filename, args):
