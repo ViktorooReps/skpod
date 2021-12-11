@@ -74,7 +74,7 @@ def wait(res_filename):
     logger.info('Job ' + res_filename + ' finished!')
 
 
-def collect_results(res_filename) -> str:
+def collect_results(res_filename):
     with open(res_filename + '.out') as f:
         res = f.read()
 
@@ -95,7 +95,7 @@ def save_results(dest, results):
     logger.info('Saved ' + str(len(combined_results.splitlines())) + ' entries')
 
 
-def create_parser() -> ArgumentParser:
+def create_parser():
     curr_datetime = datetime.now()
 
     curr_month = curr_datetime.strftime("%b")
