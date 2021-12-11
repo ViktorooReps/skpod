@@ -81,7 +81,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
             for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
                 dest = (row_idx - 1) % slave_threads + 1;
-                curr_tag = (row_idx - 1) / slave_threads;
+                curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
                 MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
