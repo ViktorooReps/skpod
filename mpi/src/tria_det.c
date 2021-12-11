@@ -55,7 +55,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
     double det = 1.0, res = 1.0;
 
     if (!rank) {
-        printf("computing det for matrix of len %d\n", len);
+        printf("computing det for matrix of len %zu with %zu threads\n", len, threads);
     }
 
     double *diag_row = malloc(sizeof(double) * len);
@@ -73,7 +73,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         int slave_threads = threads - 1;
 
         if (!rank) {
-            printf("start sending rows...\n");
+            printf("start sending rows to %d slave threads...\n", slave_threads);
             MPI_Request request;
             int dest, curr_tag;
             // send data to slave processes and make data requests
