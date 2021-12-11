@@ -45,7 +45,7 @@ det(double **matrix, size_t len)
             add_row_from_idx(matrix[row_idx], matrix[diag_idx], len, col_idx);
         }
     }
-    return det
+    return det;
 }
 
 
