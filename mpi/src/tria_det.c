@@ -155,7 +155,9 @@ main(int argc, char **argv)
 {
     //srand(SEED);
 
-    MPI_Init(NULL, NULL);
+    MPI_Init(*argc, *argv);
+
+    printf("Hi!")
 
 //    int threads, rank;
 //    MPI_Comm_size(MPI_COMM_WORLD, &threads);
