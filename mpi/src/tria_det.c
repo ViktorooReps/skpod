@@ -155,7 +155,7 @@ main(int argc, char **argv)
 {
     //srand(SEED);
 
-    MPI_Init(*argc, *argv);
+    MPI_Init(&argc, &argv);
 
     printf("Hi!");
 
