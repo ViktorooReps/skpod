@@ -210,7 +210,6 @@ main(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
-    srand(SEED);
     printf("wtf");
     MPI_Init(&argc, &argv);
     printf("wtf??");
