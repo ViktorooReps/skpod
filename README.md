@@ -12,3 +12,5 @@
 ![](mpi/graphs/polus/lineplot_small.png)
 ![](mpi/graphs/polus/lineplot_big.png)
 
+# Conclusion
+Thread parallelization performs much better due to high data dependency
