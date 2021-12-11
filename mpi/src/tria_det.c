@@ -168,7 +168,7 @@ main(int argc, char **argv)
         printf("<OUTPUT>");
     }
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < N_MATRIX_LENS; i++) {
         double **matrix = create_matrix(n[i]);
         avg_time = 0.0;
         maxval = MAX_DET_VALUE / n[i] / n[i];
