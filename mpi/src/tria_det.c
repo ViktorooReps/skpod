@@ -164,9 +164,9 @@ main(int argc, char **argv)
 //    int n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256};
 //
 //    double timer_mpi, avg_time, maxval;
-//    if (!rank) {
-//        printf("<OUTPUT>");
-//    }
+    if (!rank) {
+        printf("<OUTPUT>");
+    }
 //
 //    for (int i = 0; i < 10; i++) {
 //        double **matrix = create_matrix(n[i]);
@@ -199,9 +199,9 @@ main(int argc, char **argv)
 //        }
 //        free_matrix(matrix, n[i]);
 //    }
-//    if (!rank) {
-//        printf("<OUTPUT>");
-//    }
+    if (!rank) {
+        printf("<OUTPUT>");
+    }
     MPI_Finalize();
     return 0;
 }
