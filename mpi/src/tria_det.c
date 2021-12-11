@@ -54,6 +54,10 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 {
     double det = 1.0, res = 1.0;
 
+    if (!rank) {
+        printf("computing det for matrix of len %d\n", len);
+    }
+
     double *diag_row = malloc(sizeof(double) * len);
     double *compute_row = malloc(sizeof(double) * len);
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
@@ -171,6 +175,7 @@ main(int argc, char **argv)
 
     double timer_mpi, avg_time, maxval;
     if (!rank) {
+        printf("running on %d processes\n", threads);
         printf("<OUTPUT>");
     }
 
