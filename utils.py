@@ -18,11 +18,11 @@ class Machine:
 
 
 def mpixlc_compile(src_filename, args):
-    logger.info('Compiling ' + src_filename + ' with ' + str(args) + ' arguments...')
     compiler = 'mpixlc'
     args = [compiler] + list(args) + [str(src_filename)]
-    res = os.system(' '.join(args))
 
+    logger.info('Compiling ' + src_filename + ' with ' + str(args) + ' arguments...')
+    res = os.system(' '.join(args))
     logger.info('Compilation finished ' + str(res))
 
 
@@ -31,7 +31,7 @@ def xlc_compile(src_filename, args):
     args = [compiler] + list(args) + [str(src_filename)]
 
     logger.info('Compiling ' + src_filename + ' with ' + str(args) + ' arguments...')
-    os.system(' '.join(args))
+    res = os.system(' '.join(args))
     logger.info('Compilation finished ' + str(res))
 
 
