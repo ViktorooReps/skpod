@@ -77,10 +77,8 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
                 MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &request);
                 MPI_Request_free(&request);
-                curr_req_idx += 1;
 
                 MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                curr_req_idx += 1;
             }
         } else {
             int curr_tag = 0;
