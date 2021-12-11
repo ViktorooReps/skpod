@@ -77,3 +77,39 @@ if __name__ == '__main__':
     ax.set_title('Execution time in seconds with nxn matrix')
     plt.savefig('mpi/graphs/polus/heatmap.png')
     plt.show()
+
+    # creating graphs for mpi from bluegene
+
+    data_mpi = pd.read_csv('mpi/data/bluegene/data.csv', sep='\t')
+    data_mpi = data_mpi[data_mpi['n'] > 2]
+    small_data = data_mpi[data_mpi['n'] < 2 ** 6]
+    big_data = data_mpi[data_mpi['n'] > 2 ** 7]
+
+    palette = sns.color_palette("flare", 8)
+    sns.set()
+
+    ax = sns.lineplot(data=data_mpi, x='n', y='time', hue='processes', palette=palette)
+    ax.set_title('Execution time in seconds with nxn matrix')
+    ax.set_xscale('log', basex=2)
+    plt.savefig('mpi/graphs/bluegene/lineplot.png')
+    plt.show()
+
+    ax = sns.lineplot(data=small_data, x='n', y='time', hue='processes', palette=palette)
+    ax.set_title('Execution time in seconds with nxn matrix on smaller n')
+    ax.set_xscale('log', basex=2)
+    plt.savefig('mpi/graphs/bluegene/lineplot_small.png')
+    plt.show()
+
+    ax = sns.lineplot(data=big_data, x='n', y='time', hue='processes', palette=palette)
+    ax.set_title('Execution time in seconds with nxn matrix on larger n')
+    ax.set_xscale('log', basex=2)
+    plt.savefig('mpi/graphs/bluegene/lineplot_big.png')
+    plt.show()
+
+    data_mpi = data_mpi.pivot("n", "processes", "time")
+    dfi.export(data_mpi, 'mpi/graphs/bluegene/table.png')
+
+    ax = sns.heatmap(data_mpi, norm=LogNorm(), square=True)
+    ax.set_title('Execution time in seconds with nxn matrix')
+    plt.savefig('mpi/graphs/bluegene/heatmap.png')
+    plt.show()
