@@ -60,9 +60,6 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
     if (rank) {
         compute_row = malloc(sizeof(double) * len);
         diag_row = malloc(sizeof(double) * len);
-    } else {
-        printf("\nCOMPUTE len[%zu] processes[%zu]\n", len, threads);
-        fflush(stdout);
     }
 
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
