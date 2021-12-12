@@ -52,6 +52,9 @@ det(double **matrix, size_t len)
 double
 mpi__det(double **matrix, size_t len, size_t threads, int rank)
 {
+    MPI_Group world_group;
+    MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+
     double det = 1.0, res = 1.0;
 
     double *diag_row;
@@ -71,7 +74,29 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         }
 
         int slave_threads = threads - 1;
-        MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, MPI_COMM_WORLD);  // point of synchronization
+        int rows_to_process = len - (diag_idx + 1);
+        int working_threads = ((slave_threads > rows_to_process)? rows_to_process : slave_threads) + 1;
+        int *working_ranks = malloc(sizeof(int) * working_threads);
+
+        for (int worker_idx = 0; worker_idx < working_threads; ++worker_idx) {
+            working_ranks[worker_idx] = worker_idx;
+        }
+
+        // working group consists of slaves (less or equal then rows_to_process) and master
+        MPI_Group working_group;
+        MPI_Group_incl(world_group, working_threads, working_ranks, &working_group);
+
+        MPI_Comm working_comm;
+        MPI_Comm_create_group(MPI_COMM_WORLD, working_group, 0, &working_comm);
+
+        // if process is not included in working_group it should skip rows computation
+        if (MPI_COMM_NULL != working_comm) {
+            MPI_Comm_rank(working_comm, &rank);
+        } else {
+            continue;
+        }
+
+        MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, working_comm);  // point of synchronization
 
         if (!rank) {
             // send data to slave processes
@@ -81,21 +106,21 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 dest = (row_idx - 1) % slave_threads + 1;
                 curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
-                MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &request);
+                MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, &request);
                 MPI_Request_free(&request);
             }
 
             // make recv requests from processes
-            int total_requests = len - (diag_idx + 1), next_diag = diag_idx + 1;
+            int total_requests = rows_to_process, next_diag = diag_idx + 1;
             for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
                 dest = (row_idx - 1) % slave_threads + 1;
                 curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
                 if (row_idx == next_diag) {
                     // need only next diag row to continue computation
-                    MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, MPI_STATUS_IGNORE);
                 } else {
-                    MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &request);
+                    MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, &request);
                     MPI_Request_free(&request);
                 }
             }
@@ -109,7 +134,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             MPI_Request request;
             while (assigned_row < len) {
                 // receive data from master process
-                MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm, MPI_STATUS_IGNORE);
 
                 // reset (assigned_row, col_idx) element to zero
                 double elem = compute_row[col_idx];
@@ -118,13 +143,16 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 add_row_from_idx(compute_row, diag_row, len, col_idx);
 
                 // send modified data back to master
-                MPI_Isend(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD, &request);
+                MPI_Isend(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm, &request);
                 MPI_Request_free(&request);
 
                 assigned_row += slave_threads;
                 curr_tag += 1;
             }
         }
+
+        MPI_Group_free(&working_group);
+        MPI_Comm_free(&working_comm);
     }
 
     if (rank) {
@@ -132,8 +160,9 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         free(compute_row);
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, MPI_COMM_WORLD);
+
+    MPI_Group_free(&world_group);
 
     return res;
 }
@@ -203,9 +232,8 @@ main(int argc, char **argv)
 
             double d;
             if (threads < 2) {
-                if (!rank) {
-                    d = det(matrix, n[i]);
-                }
+                // cannot use master-slave parallelization with one process :)
+                d = det(matrix, n[i]);
             } else {
                 d = mpi__det(matrix, n[i], threads, rank);
             }
