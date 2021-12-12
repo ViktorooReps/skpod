@@ -87,22 +87,16 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
             // make recv requests from processes
             int total_requests = len - (diag_idx + 1), next_diag = diag_idx + 1;
-            MPI_Request next_diag_request;
             for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
                 dest = (row_idx - 1) % slave_threads + 1;
                 curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
                 if (row_idx == next_diag) {
-                    MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &next_diag_request);
+                    MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 } else {
                     MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &request);
                     MPI_Request_free(&request);
                 }
-            }
-
-            if (total_requests) {
-                // wait for next diag request completion
-                MPI_Wait(next_diag_request, MPI_STATUS_IGNORE);
             }
         } else {
             int col_idx = diag_idx;
