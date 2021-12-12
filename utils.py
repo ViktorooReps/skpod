@@ -112,7 +112,7 @@ def create_parser():
     curr_hour = curr_datetime.hour
     curr_minute = curr_datetime.minute
 
-    experiment_desc = str(curr_day) + '-' + curr_month + '-' + str(curr_hour) + ':' + str(curr_minute) + '-job'
+    experiment_desc = str(curr_day) + '-' + curr_month + '-' + str(curr_hour) + ':{:02d}-job'.format(curr_minute)
 
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('processes', type=int, nargs='+',
