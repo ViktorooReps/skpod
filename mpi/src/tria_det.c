@@ -92,11 +92,12 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         // if process is not included in working_group it should skip rows computation
         if (working_comm != MPI_COMM_NULL) {
             slave_threads = working_threads - 1;
+            int working_rank;
 
-            MPI_Comm_rank(working_comm, &rank);
+            MPI_Comm_rank(working_comm, &working_rank);
             MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, working_comm);  // point of synchronization
 
-            if (!rank) {
+            if (!working_rank) {
                 // send data to slave processes
                 MPI_Request request;
                 int dest, curr_tag;
@@ -124,7 +125,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 }
             } else {
                 int col_idx = diag_idx;
-                int assigned_row = rank;
+                int assigned_row = working_rank;
                 while (assigned_row <= diag_idx) {
                     assigned_row += slave_threads;
                 }
@@ -148,10 +149,11 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                     curr_tag += 1;
                 }
             }
+
+            MPI_Group_free(&working_group);
+            MPI_Comm_free(&working_comm);
         }
 
-        MPI_Group_free(&working_group);
-        MPI_Comm_free(&working_comm);
         free(working_ranks);
     }
 
