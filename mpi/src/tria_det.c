@@ -76,6 +76,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         int slave_threads = threads - 1;
         printf("BCAST START %d for diag %d\n", rank, diag_idx);
         fflush(stdout);
+        MPI_Barrier(MPI_COMM_WORLD);
         MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, MPI_COMM_WORLD);  // point of synchronization
         printf("BCAST END %d for diag %d\n", rank, diag_idx);
         fflush(stdout);
