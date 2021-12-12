@@ -149,7 +149,7 @@ main(int argc, char **argv)
             matrix = init_matrix(n[i], maxval);
 
             timer_omp = omp_get_wtime();
-            double d = det(matrix, n[i], threads);
+            double d = omp__det(matrix, n[i], threads);
             avg_time += omp_get_wtime() - timer_omp;
         }
         avg_time /= (double)N_RUNS;
