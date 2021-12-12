@@ -153,6 +153,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
         MPI_Group_free(&working_group);
         MPI_Comm_free(&working_comm);
+        free(working_ranks);
     }
 
     if (rank) {
