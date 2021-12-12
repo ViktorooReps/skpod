@@ -14,11 +14,14 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
 
     if args.mpi:
-        compile_args = ['-o', args.exec_file]
+        compile_args = ['-qsmp=omp', '-O5', '-o', args.exec_file]
         mpixlc_compile(args.src_file, compile_args)
+    # else:
+    #     compile_args = ['-qsmp=omp', '-o', args.exec_file]
+    #     xlc_compile(args.src_file, compile_args)
     else:
-        compile_args = ['-qsmp=omp', '-o', args.exec_file]
-        xlc_compile(args.src_file, compile_args)
+        compile_args = ['-qsmp=omp', '-o', '-O5', args.exec_file]
+        mpixlc_compile(args.src_file, compile_args)
 
     if not os.path.exists(args.exec_file):
         raise ValueError('Compilation failed!')
