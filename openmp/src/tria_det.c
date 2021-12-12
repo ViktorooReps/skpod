@@ -73,35 +73,6 @@ omp__det(double **matrix, size_t len, size_t threads)
     return det;
 }
 
-//double
-//det(double **matrix, size_t len, size_t threads)
-//{
-//    double det = 1.0;
-//
-//    int diag_idx, c_idx;
-//#pragma omp parallel for private(diag_idx, c_idx) shared(matrix, det) num_threads(threads)
-//    for (diag_idx = 0; diag_idx < len; ++diag_idx) {
-//        // reset all elements before diagonal to zero
-//        for (c_idx = 0; c_idx < diag_idx; ++c_idx) {
-//            double elem = matrix[diag_idx][c_idx];
-//            double inv_elem = 1.0 / elem;
-//
-//            mult_row_from_idx(matrix[diag_idx], -1.0 * inv_elem, len, c_idx);
-//            det *= -1.0 * elem;
-//
-//            add_row_from_idx(matrix[diag_idx], matrix[c_idx], len, c_idx);
-//        }
-//
-//        double diag_elem = matrix[diag_idx][diag_idx];
-//        double inv_diag_elem = 1.0 / diag_elem;
-//
-//        mult_row_from_idx(matrix[diag_idx], inv_diag_elem, len, diag_idx);
-//        det *= diag_elem;
-//    }
-//
-//    return det;
-//}
-
 double **
 init_matrix(int n, double maxval)
 {

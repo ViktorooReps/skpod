@@ -100,8 +100,10 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 }
             }
 
-            // wait for next diag request completion
-            MPI_Wait(next_diag_request, MPI_STATUS_IGNORE);
+            if (total_requests) {
+                // wait for next diag request completion
+                MPI_Wait(next_diag_request, MPI_STATUS_IGNORE);
+            }
         } else {
             int col_idx = diag_idx;
             int assigned_row = rank;
