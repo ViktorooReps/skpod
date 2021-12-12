@@ -27,33 +27,80 @@ add_row_from_idx(double *row_dest, double *row_to_add, size_t row_len, size_t fr
 }
 
 double
-det(double **matrix, size_t len, size_t threads)
+det(double **matrix, size_t len)
 {
-    double det = 1.0;
-
-    int diag_idx, c_idx;
-#pragma omp parallel for private(diag_idx, c_idx) shared(matrix, det) num_threads(threads)
+    double det = 1.0, diag_elem, elem;
+    int diag_idx, row_idx, col_idx;
     for (diag_idx = 0; diag_idx < len; ++diag_idx) {
-        // reset all elements before diagonal to zero
-        for (c_idx = 0; c_idx < diag_idx; ++c_idx) {
-            double elem = matrix[diag_idx][c_idx];
-            double inv_elem = 1.0 / elem;
-
-            mult_row_from_idx(matrix[diag_idx], -1.0 * inv_elem, len, c_idx);
-            det *= -1.0 * elem;
-
-            add_row_from_idx(matrix[diag_idx], matrix[c_idx], len, c_idx);
-        }
-
-        double diag_elem = matrix[diag_idx][diag_idx];
-        double inv_diag_elem = 1.0 / diag_elem;
-
-        mult_row_from_idx(matrix[diag_idx], inv_diag_elem, len, diag_idx);
+        // reset diagonal element to 1.0
+        diag_elem = matrix[diag_idx][diag_idx];
+        mult_row_from_idx(matrix[diag_idx], 1.0 / diag_elem, len, diag_idx);
         det *= diag_elem;
-    }
 
+        // reset elements under diagonal to 0
+        col_idx = diag_idx;
+        for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
+            elem = matrix[row_idx][col_idx];
+            mult_row_from_idx(matrix[row_idx], -1.0 / elem, len, col_idx);
+            det *= -1.0 * elem;
+            add_row_from_idx(matrix[row_idx], matrix[diag_idx], len, col_idx);
+        }
+    }
     return det;
 }
+
+double
+omp__det(double **matrix, size_t len, size_t threads)
+{
+    double det = 1.0, diag_elem, elem;
+    int diag_idx, row_idx, col_idx;
+#pragma omp parallel for private(diag_idx, row_idx, col_idx, diag_elem, elem) shared(matrix, det) num_threads(threads)
+    for (diag_idx = 0; diag_idx < len; ++diag_idx) {
+        // reset diagonal element to 1.0
+        diag_elem = matrix[diag_idx][diag_idx];
+        mult_row_from_idx(matrix[diag_idx], 1.0 / diag_elem, len, diag_idx);
+        det *= diag_elem;
+
+        // reset elements under diagonal to 0
+        col_idx = diag_idx;
+        for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
+            elem = matrix[row_idx][col_idx];
+            mult_row_from_idx(matrix[row_idx], -1.0 / elem, len, col_idx);
+            det *= -1.0 * elem;
+            add_row_from_idx(matrix[row_idx], matrix[diag_idx], len, col_idx);
+        }
+    }
+    return det;
+}
+
+//double
+//det(double **matrix, size_t len, size_t threads)
+//{
+//    double det = 1.0;
+//
+//    int diag_idx, c_idx;
+//#pragma omp parallel for private(diag_idx, c_idx) shared(matrix, det) num_threads(threads)
+//    for (diag_idx = 0; diag_idx < len; ++diag_idx) {
+//        // reset all elements before diagonal to zero
+//        for (c_idx = 0; c_idx < diag_idx; ++c_idx) {
+//            double elem = matrix[diag_idx][c_idx];
+//            double inv_elem = 1.0 / elem;
+//
+//            mult_row_from_idx(matrix[diag_idx], -1.0 * inv_elem, len, c_idx);
+//            det *= -1.0 * elem;
+//
+//            add_row_from_idx(matrix[diag_idx], matrix[c_idx], len, c_idx);
+//        }
+//
+//        double diag_elem = matrix[diag_idx][diag_idx];
+//        double inv_diag_elem = 1.0 / diag_elem;
+//
+//        mult_row_from_idx(matrix[diag_idx], inv_diag_elem, len, diag_idx);
+//        det *= diag_elem;
+//    }
+//
+//    return det;
+//}
 
 double **
 init_matrix(int n, double maxval)
