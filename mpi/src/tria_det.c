@@ -91,6 +91,8 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
         // if process is not included in working_group it should skip rows computation
         if (working_comm != MPI_COMM_NULL) {
+            slave_threads = working_threads - 1;
+
             MPI_Comm_rank(working_comm, &rank);
             MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, working_comm);  // point of synchronization
 
@@ -153,14 +155,13 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         free(working_ranks);
     }
 
+    MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, MPI_COMM_WORLD);
+
+    MPI_Group_free(&world_group);
     if (rank) {
         free(diag_row);
         free(compute_row);
     }
-
-    MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, MPI_COMM_WORLD);
-
-    MPI_Group_free(&world_group);
 
     return res;
 }
