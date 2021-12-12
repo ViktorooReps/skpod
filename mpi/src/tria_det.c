@@ -90,64 +90,61 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         MPI_Comm_create_group(MPI_COMM_WORLD, working_group, 0, &working_comm);
 
         // if process is not included in working_group it should skip rows computation
-        if (MPI_COMM_NULL != working_comm) {
+        if (working_comm != MPI_COMM_NULL) {
             MPI_Comm_rank(working_comm, &rank);
-        } else {
-            continue;
-        }
+            MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, working_comm);  // point of synchronization
 
-        MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, working_comm);  // point of synchronization
+            if (!rank) {
+                // send data to slave processes
+                MPI_Request request;
+                int dest, curr_tag;
+                for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
+                    dest = (row_idx - 1) % slave_threads + 1;
+                    curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
-        if (!rank) {
-            // send data to slave processes
-            MPI_Request request;
-            int dest, curr_tag;
-            for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
-                dest = (row_idx - 1) % slave_threads + 1;
-                curr_tag = (row_idx - diag_idx - 1) / slave_threads;
-
-                MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, &request);
-                MPI_Request_free(&request);
-            }
-
-            // make recv requests from processes
-            int total_requests = rows_to_process, next_diag = diag_idx + 1;
-            for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
-                dest = (row_idx - 1) % slave_threads + 1;
-                curr_tag = (row_idx - diag_idx - 1) / slave_threads;
-
-                if (row_idx == next_diag) {
-                    // need only next diag row to continue computation
-                    MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, MPI_STATUS_IGNORE);
-                } else {
-                    MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, &request);
+                    MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, &request);
                     MPI_Request_free(&request);
                 }
-            }
-        } else {
-            int col_idx = diag_idx;
-            int assigned_row = rank;
-            while (assigned_row <= diag_idx) {
-                assigned_row += slave_threads;
-            }
-            int curr_tag = 0;
-            MPI_Request request;
-            while (assigned_row < len) {
-                // receive data from master process
-                MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm, MPI_STATUS_IGNORE);
 
-                // reset (assigned_row, col_idx) element to zero
-                double elem = compute_row[col_idx];
-                mult_row_from_idx(compute_row, -1.0 / elem, len, col_idx);
-                det *= -1.0 * elem;
-                add_row_from_idx(compute_row, diag_row, len, col_idx);
+                // make recv requests from processes
+                int total_requests = rows_to_process, next_diag = diag_idx + 1;
+                for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
+                    dest = (row_idx - 1) % slave_threads + 1;
+                    curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
-                // send modified data back to master
-                MPI_Isend(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm, &request);
-                MPI_Request_free(&request);
+                    if (row_idx == next_diag) {
+                        // need only next diag row to continue computation
+                        MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, MPI_STATUS_IGNORE);
+                    } else {
+                        MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, &request);
+                        MPI_Request_free(&request);
+                    }
+                }
+            } else {
+                int col_idx = diag_idx;
+                int assigned_row = rank;
+                while (assigned_row <= diag_idx) {
+                    assigned_row += slave_threads;
+                }
+                int curr_tag = 0;
+                MPI_Request request;
+                while (assigned_row < len) {
+                    // receive data from master process
+                    MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm, MPI_STATUS_IGNORE);
 
-                assigned_row += slave_threads;
-                curr_tag += 1;
+                    // reset (assigned_row, col_idx) element to zero
+                    double elem = compute_row[col_idx];
+                    mult_row_from_idx(compute_row, -1.0 / elem, len, col_idx);
+                    det *= -1.0 * elem;
+                    add_row_from_idx(compute_row, diag_row, len, col_idx);
+
+                    // send modified data back to master
+                    MPI_Isend(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm, &request);
+                    MPI_Request_free(&request);
+
+                    assigned_row += slave_threads;
+                    curr_tag += 1;
+                }
             }
         }
 
