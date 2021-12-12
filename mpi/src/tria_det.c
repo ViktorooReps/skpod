@@ -70,8 +70,8 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             det *= diag_elem;
         }
 
-        MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, MPI_COMM_WORLD);
         int slave_threads = threads - 1;
+        MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, MPI_COMM_WORLD);  // point of synchronization
 
         if (!rank) {
             // send data to slave processes
@@ -86,22 +86,22 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             }
 
             // make recv requests from processes
-            int total_requests = len - (diag_idx + 1), curr_request = 0;
-            MPI_Request *recv_requests = malloc(sizeof(MPI_Request) * total_requests);
+            int total_requests = len - (diag_idx + 1), next_diag = diag_idx + 1;
+            MPI_Request next_diag_request;
             for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
                 dest = (row_idx - 1) % slave_threads + 1;
                 curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
-                MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, recv_requests + curr_request);
-                curr_request += 1;
+                if (row_idx == next_diag) {
+                    MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &next_diag_request);
+                } else {
+                    MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &request);
+                    MPI_Request_free(&request);
+                }
             }
 
-            // wait for requests completion
-            for (int req_idx = 0; req_idx < total_requests; ++req_idx) {
-                MPI_Wait(recv_requests + req_idx, MPI_STATUS_IGNORE);
-            }
-
-            free(recv_requests);
+            // wait for next diag request completion
+            MPI_Wait(next_diag_request, MPI_STATUS_IGNORE);
         } else {
             int col_idx = diag_idx;
             int assigned_row = rank;
