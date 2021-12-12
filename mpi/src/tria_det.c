@@ -74,9 +74,11 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         }
 
         int slave_threads = threads - 1;
-        printf("BCAST %d\n", rank);
+        printf("BCAST START %d for diag %d\n", rank, diag_idx);
         fflush(stdout);
         MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, MPI_COMM_WORLD);  // point of synchronization
+        printf("BCAST END %d for diag %d\n", rank, diag_idx);
+        fflush(stdout);
 
         if (!rank) {
             // send data to slave processes
@@ -86,14 +88,8 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 dest = (row_idx - 1) % slave_threads + 1;
                 curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
-                printf("ISEND START from master to slave[%d] with tag[%d]\n", dest, curr_tag);
-                fflush(stdout);
-
                 MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &request);
                 MPI_Request_free(&request);
-
-                printf("ISEND END from master to slave[%d] with tag[%d]\n", dest, curr_tag);
-                fflush(stdout);
             }
 
             // make recv requests from processes
@@ -103,20 +99,10 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
                 if (row_idx == next_diag) {
-                    printf("RECV START from master to slave[%d] with tag[%d]\n", dest, curr_tag);
-                    fflush(stdout);
                     MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    printf("RECV END from master to slave[%d] with tag[%d]\n", dest, curr_tag);
-                    fflush(stdout);
                 } else {
-                    printf("IRECV START from master to slave[%d] with tag[%d]\n", dest, curr_tag);
-                    fflush(stdout);
-
                     MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &request);
                     MPI_Request_free(&request);
-
-                    printf("IRECV END from master to slave[%d] with tag[%d]\n", dest, curr_tag);
-                    fflush(stdout);
                 }
             }
         } else {
@@ -129,13 +115,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
             MPI_Request request;
             while (assigned_row < len) {
                 // receive data from master process
-                printf("RECV START from slave[%d] to master with tag[%d]\n", rank, curr_tag);
-                fflush(stdout);
-
                 MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-                printf("RECV END from slave[%d] to master with tag[%d]\n", rank, curr_tag);
-                fflush(stdout);
 
                 // reset (assigned_row, col_idx) element to zero
                 double elem = compute_row[col_idx];
@@ -143,15 +123,9 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 det *= -1.0 * elem;
                 add_row_from_idx(compute_row, diag_row, len, col_idx);
 
-                printf("ISEND START from slave[%d] to master with tag[%d]\n", rank, curr_tag);
-                fflush(stdout);
-
                 // send modified data back to master
                 MPI_Isend(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, MPI_COMM_WORLD, &request);
                 MPI_Request_free(&request);
-
-                printf("ISEND END from slave[%d] to master with tag[%d]\n", rank, curr_tag);
-                fflush(stdout);
 
                 assigned_row += slave_threads;
                 curr_tag += 1;
