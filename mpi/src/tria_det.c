@@ -74,12 +74,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         }
 
         int slave_threads = threads - 1;
-        printf("BCAST START %d for diag %d\n", rank, diag_idx);
-        fflush(stdout);
-        MPI_Barrier(MPI_COMM_WORLD);
         MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, MPI_COMM_WORLD);  // point of synchronization
-        printf("BCAST END %d for diag %d\n", rank, diag_idx);
-        fflush(stdout);
 
         if (!rank) {
             // send data to slave processes
@@ -100,6 +95,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                 curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
                 if (row_idx == next_diag) {
+                    // need only next diag row to continue computation
                     MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 } else {
                     MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, MPI_COMM_WORLD, &request);
