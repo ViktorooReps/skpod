@@ -105,8 +105,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                     dest = (row_idx - 1) % slave_threads + 1;
                     curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
-                    MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, &request);
-                    MPI_Request_free(&request);
+                    MPI_Send(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm);
                 }
 
                 // make recv requests from processes
@@ -142,8 +141,7 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                     add_row_from_idx(compute_row, diag_row, len, col_idx);
 
                     // send modified data back to master
-                    MPI_Isend(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm, &request);
-                    MPI_Request_free(&request);
+                    MPI_Send(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm);
 
                     assigned_row += slave_threads;
                     curr_tag += 1;
