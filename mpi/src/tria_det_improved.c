@@ -174,8 +174,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             }
 
             // send new diagonal row to all processes
-            printf("[%d, %d]: broadcasting...\n", rank, working_rank);
-            MPI_Barrier(working_comm);
+            printf("[%d, %d]: broadcasting from %d row of len %d...\n", rank, working_rank, diag_assigned_working_rank, curr_row_len);
             MPI_Bcast(non_zero_diag_row, curr_row_len, MPI_DOUBLE, diag_assigned_working_rank, working_comm);
             printf("[%d, %d]: broadcasted!\n", rank, working_rank);
 
