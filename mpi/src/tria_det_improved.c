@@ -60,6 +60,7 @@ det(double *matrix, size_t len)
 
     double det = 1.0;
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
+        printf("curr_det: %f\n", det);
         int diag_row_offset = len * diag_idx;
         int curr_row_len = len - diag_idx;
         double *non_zero_diag_row = matrix_copy + diag_row_offset + diag_idx;
