@@ -109,7 +109,7 @@ omp__det(double *matrix, size_t len, int threads)
     memcpy(matrix_copy, matrix, len * len * sizeof(double));
 
     double det = 1.0, diag_elem, elem;
-#pragma omp parallel for private(diag_idx, row_idx, col_idx, diag_elem, elem) shared(matrix_copy, det) num_threads(threads)
+#pragma omp parallel for private(diag_idx, row_idx, col_idx, diag_elem, elem, non_zero_diag_row, non_zero_row) shared(matrix_copy, det) num_threads(threads)
     for (diag_idx = 0; diag_idx < len; ++diag_idx) {
         non_zero_diag_row = matrix_copy + len * diag_idx + diag_idx;
 
