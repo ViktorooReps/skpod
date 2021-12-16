@@ -128,7 +128,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
     double *diag_row = malloc(sizeof(double) * len);
 
     MPI_Scatterv(matrix, send_counts, displacements,
-                 MPI_DOUBLE, compute_rows, assigned_rows,
+                 MPI_DOUBLE, compute_rows, assigned_rows * len,
                  MPI_DOUBLE, MASTER_RANK, MPI_COMM_WORLD);
 
     if (!rank) {
