@@ -176,7 +176,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             // send new diagonal row to all processes
             printf("[world: %d, work: %d, idx: %d, len: %zu]: broadcasting from %d row of len %d...\n", rank, working_rank, diag_idx, len, diag_assigned_working_rank, curr_row_len);
             MPI_Bcast(non_zero_diag_row, curr_row_len, MPI_DOUBLE, diag_assigned_working_rank, working_comm);
-            MPI_Barrier(working_comm);
             printf("[world: %d, work: %d, idx: %d, len: %zu]: broadcasted!\n", rank, working_rank, diag_idx, len);
 
             // reset elements under diagonal to 0 for all assigned rows
@@ -193,7 +192,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         }
 
         MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, working_comm);
-        MPI_Barrier(working_comm);
 
         free(diag_row);
         free(compute_rows);
@@ -203,6 +201,8 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
     MPI_Group_free(&working_group);
 
     free(working_ranks);
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     return res;
 }
