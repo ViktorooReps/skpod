@@ -143,6 +143,17 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
                      MPI_DOUBLE, compute_rows, assigned_rows,
                      MPI_DOUBLE, MASTER_RANK, working_comm);
 
+        if (!rank) {
+            print_matrix(matrix, len);
+        }
+        printf("[%d] compute_rows:\n", working_rank);
+        for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
+            for (int col_idx = 0; col_idx < len; ++col_idx) {
+                printf("%f ", compute_rows[row_idx * len + col_idx]);
+            }
+            printf("\n");
+        }
+
         free(displacements);
         free(send_counts);
 
@@ -169,6 +180,14 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
                 // copy computed row to buffer
                 memcpy(non_zero_diag_row, non_zero_compute_row, curr_row_len * sizeof(double));
+            }
+
+            printf("[%d, %d] compute_rows:\n", working_rank, diag_idx);
+            for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
+                for (int col_idx = 0; col_idx < len; ++col_idx) {
+                    printf("%f ", compute_rows[row_idx * len + col_idx]);
+                }
+                printf("\n");
             }
 
             // send new diagonal row to all processes
