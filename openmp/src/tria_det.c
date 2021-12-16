@@ -105,7 +105,7 @@ double
 omp__det(double *matrix, size_t len, int threads)
 {
     int diag_idx, col_idx, row_idx;
-    double *matrix_copy = alloc_matrix(len), non_zero_diag_row, non_zero_row;
+    double *matrix_copy = alloc_matrix(len), *non_zero_diag_row, *non_zero_row;
     memcpy(matrix_copy, matrix, len * len * sizeof(double));
 
     double det = 1.0, diag_elem, elem;
@@ -121,7 +121,7 @@ omp__det(double *matrix, size_t len, int threads)
         // reset elements under diagonal to 0
         col_idx = diag_idx;
         for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
-            *non_zero_row = matrix_copy + row_idx * len + col_idx;
+            non_zero_row = matrix_copy + row_idx * len + col_idx;
 
             elem = *non_zero_row;
             mult_row(non_zero_row, -1.0 / elem, len - diag_idx);
