@@ -149,7 +149,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         printf("[%d] compute_rows:\n", working_rank);
         for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
             for (int col_idx = 0; col_idx < len; ++col_idx) {
-                printf("%f ", compute_rows[row_idx * len + col_idx])
+                printf("%f ", compute_rows[row_idx * len + col_idx]);
             }
             printf("\n");
         }
