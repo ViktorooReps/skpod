@@ -134,7 +134,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             displacements[row_idx] = row_idx % working_threads;
         }
 
-        int assigned_rows = len / working_threads + (rank < len % working_threads);
+        int assigned_rows = len / working_threads + (rank < (len % working_threads));
 
         double *compute_rows = malloc(sizeof(double) * len * assigned_rows);
         double *diag_row = malloc(sizeof(double) * len);
@@ -142,17 +142,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         MPI_Scatterv(matrix, send_counts, displacements,
                      MPI_DOUBLE, compute_rows, assigned_rows,
                      MPI_DOUBLE, MASTER_RANK, working_comm);
-
-        if (!rank) {
-            print_matrix(matrix, len);
-        }
-        printf("[%d] compute_rows:\n", working_rank);
-        for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
-            for (int col_idx = 0; col_idx < len; ++col_idx) {
-                printf("%f ", compute_rows[row_idx * len + col_idx]);
-            }
-            printf("\n");
-        }
 
         free(displacements);
         free(send_counts);
@@ -185,8 +174,8 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             // send new diagonal row to all processes
             MPI_Bcast(non_zero_diag_row, curr_row_len, MPI_DOUBLE, diag_assigned_working_rank, working_comm);
 
-            // reset elements under diagonal to 0 for all assigned rows
-            for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
+            // reset elements to 0 for assigned rows under diagonal
+            for (int row_idx = assigned_rows - 1; row_idx * working_threads + working_rank > diag_idx; --row_idx) {
                 int row_offset = row_idx * len;
                 double *non_zero_row = compute_rows + row_offset + non_zeros;
 
