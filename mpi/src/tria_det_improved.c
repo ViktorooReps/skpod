@@ -221,10 +221,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
                         MASTER_RANK, overtime_comm);
         }
 
-        if (!rank) {
-            print_matrix(matrix, len);
-        }
-
         // everything is ready for determinant computation
         double det = 1.0;
         double *non_zero_diag_row;
