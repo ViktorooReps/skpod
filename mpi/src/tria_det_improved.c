@@ -195,8 +195,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
                         compute_rows, len * normal_load, MPI_DOUBLE,
                         MASTER_RANK, normal_comm);
 
-            MPI_Type_free(&normal_rows_resized);
-
             if (!normal_rank && (normal_threads != working_threads)) {
                 free(normal_matrix_half);
             }
@@ -221,8 +219,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             MPI_Scatter(matrix, 1, overtime_rows_resized,
                         compute_rows, len * overtime_load, MPI_DOUBLE,
                         MASTER_RANK, overtime_comm);
-
-            MPI_Type_free(&overtime_rows_resized);
         }
 
         if (!rank) {
