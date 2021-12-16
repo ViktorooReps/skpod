@@ -5,7 +5,7 @@
 #include <float.h>
 #include <mpi.h>
 
-#define N_RUNS 10
+#define N_RUNS 1
 #define N_MATRIX_LENS 3
 #define SEED 42
 #define MAX_DET_VALUE 10.0
@@ -108,6 +108,10 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
     MPI_Group world_group;
     MPI_Comm_group(MPI_COMM_WORLD, &world_group);
 
+    if (!rank) {
+        printf("len: %zu\n", len);
+    }
+
     double res = 1.0;
 
     int working_threads = ((threads > len)? len : threads);
@@ -154,6 +158,10 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
     MPI_Comm overtime_comm;
     MPI_Comm_create_group(working_comm, overtime_group, 0, &overtime_comm);
+
+    if (!rank) {
+        printf("working: %d, normal: %d, overtime: %d\n", working_threads, normal_threads, overtime_threads);
+    }
 
     if (working_comm != MPI_COMM_NULL) {
         int working_rank;
