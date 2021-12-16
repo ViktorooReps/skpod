@@ -37,11 +37,11 @@ add_row(double *row_dest, double *row_to_add, size_t row_len)
 }
 
 void
-init_matrix(double *matrix, size_t len, double max_val, double min_val)
+init_matrix(double *matrix, size_t len, double max_val)
 {
     for (size_t row_idx = 0; row_idx < len; ++row_idx) {
         for (size_t col_idx = 0; col_idx < len; ++col_idx) {
-            matrix[row_idx * len + col_idx] = ((double)rand() / (double)RAND_MAX) * (max_val - min_val) + min_val;
+            matrix[row_idx * len + col_idx] = ((double)rand() / (double)RAND_MAX) * max_val;
         }
     }
 }
@@ -172,7 +172,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             }
 
             // send new diagonal row to all processes
-            MPI_Bcast(diag_row + non_zeros, curr_row_len, MPI_DOUBLE, diag_assigned_working_rank, working_comm);
+            MPI_Bcast(non_zero_diag_row, curr_row_len, MPI_DOUBLE, diag_assigned_working_rank, working_comm);
 
             // reset elements under diagonal to 0 for all assigned rows
             for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
@@ -227,7 +227,7 @@ main(int argc, char **argv)
 
         if (!rank) {
             matrix = alloc_matrix(len);
-            init_matrix(matrix, len, MAX_DET_VALUE / len / len, MAX_DET_VALUE / len / len / len);
+            init_matrix(matrix, len, MAX_DET_VALUE / len / len);
             true_det = det(matrix, len);
         }
         avg_time = 0.0;
