@@ -143,29 +143,30 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
     MPI_Group_incl(world_group, working_threads, working_ranks, &working_group);
 
     MPI_Comm working_comm;
-    MPI_Comm_create_group(MPI_COMM_WORLD, working_group, 0, &working_comm);
-
-    // processes with normal_load assigned rows
-    MPI_Group normal_group;
-    MPI_Group_incl(working_group, normal_threads, normal_ranks, &normal_group);
-
-    MPI_Comm normal_comm;
-    MPI_Comm_create_group(working_comm, normal_group, 0, &normal_comm);
-
-    // processes with overtime_load assigned rows
-    MPI_Group overtime_group;
-    MPI_Group_incl(working_group, overtime_threads, overtime_ranks, &overtime_group);
-
-    MPI_Comm overtime_comm;
-    MPI_Comm_create_group(working_comm, overtime_group, 0, &overtime_comm);
-
-    if (!rank) {
-        printf("working: %d, normal: %d, overtime: %d\n", working_threads, normal_threads, overtime_threads);
-    }
+    MPI_Comm_create_group(MPI_COMM_WORLD, working_group, 1, &working_comm);
 
     if (working_comm != MPI_COMM_NULL) {
+
         int working_rank;
         MPI_Comm_rank(working_comm, &working_rank);
+
+        // processes with normal_load assigned rows
+        MPI_Group normal_group;
+        MPI_Group_incl(working_group, normal_threads, normal_ranks, &normal_group);
+
+        MPI_Comm normal_comm;
+        MPI_Comm_create_group(working_comm, normal_group, 2, &normal_comm);
+
+        // processes with overtime_load assigned rows
+        MPI_Group overtime_group;
+        MPI_Group_incl(working_group, overtime_threads, overtime_ranks, &overtime_group);
+
+        MPI_Comm overtime_comm;
+        MPI_Comm_create_group(working_comm, overtime_group, 3, &overtime_comm);
+
+        if (!rank) {
+            printf("working: %d, normal: %d, overtime: %d\n", working_threads, normal_threads, overtime_threads);
+        }
 
         // distribute rows among working processes
 
@@ -206,7 +207,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
             MPI_Type_free(&normal_rows);
 
-            if (!normal_rank && normal_threads != working_threads) {
+            if (!normal_rank && (normal_threads != working_threads)) {
                 free(normal_matrix_half);
             }
         }
@@ -277,14 +278,15 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
         MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, working_comm);
 
+        MPI_Group_free(&overtime_group);
+        MPI_Group_free(&normal_group);
+
         free(diag_row);
         free(compute_rows);
     }
 
     MPI_Group_free(&world_group);
     MPI_Group_free(&working_group);
-    MPI_Group_free(&overtime_group);
-    MPI_Group_free(&normal_group);
 
     free(working_ranks);
     free(overtime_ranks);
