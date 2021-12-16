@@ -224,13 +224,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         if (!rank) {
             print_matrix(matrix, len);
         }
-        printf("[%d] compute_rows:\n", rank);
-        for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
-            for (int col_idx = 0; col_idx < len; ++col_idx) {
-                printf("%f ", compute_rows[row_idx * len + col_idx]);
-            }
-            printf(" <- [%d]\n", rank);
-        }
 
         // everything is ready for determinant computation
         double det = 1.0;
@@ -270,14 +263,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
                 det *= -1.0 * elem;
 
                 add_row(non_zero_row, non_zero_diag_row, curr_row_len);
-            }
-
-            printf("[%d] compute_rows:\n", rank);
-            for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
-                for (int col_idx = 0; col_idx < len; ++col_idx) {
-                    printf("%f ", compute_rows[row_idx * len + col_idx]);
-                }
-                printf(" <- [%d]\n", rank);
             }
         }
 
