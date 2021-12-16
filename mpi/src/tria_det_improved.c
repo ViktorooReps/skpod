@@ -8,7 +8,7 @@
 #define N_RUNS 10
 #define N_MATRIX_LENS 10
 #define SEED 42
-#define MAX_DET_VALUE 10000.0
+#define MAX_DET_VALUE 10.0
 #define MASTER_RANK 0
 
 #define EPS 1e-07
