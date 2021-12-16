@@ -219,7 +219,12 @@ main(int argc, char **argv)
 
             timer_mpi = MPI_Wtime();
 
-            parallel_det = ((threads < 2)? det(matrix, len) : mpi__det(matrix, len, threads, rank));
+            if (threads < 2) {
+                parallel_det = ((!rank)? det(matrix, len) : 0.0);
+            } else {
+                parallel_det = mpi__det(matrix, len, threads, rank);
+            }
+
             if (!rank && !double_close(parallel_det, true_det)) {
                 printf("WRONG: (parallel) %f != %f (true)\n", parallel_det, true_det);
                 break;
