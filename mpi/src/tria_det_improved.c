@@ -6,7 +6,7 @@
 #include <mpi.h>
 
 #define N_RUNS 10
-#define N_MATRIX_LENS 10
+#define N_MATRIX_LENS 5
 #define SEED 42
 #define MAX_DET_VALUE 10.0
 #define MASTER_RANK 0
@@ -60,7 +60,6 @@ det(double *matrix, size_t len)
 
     double det = 1.0;
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
-        printf("curr_det: %f\n", det);
         int diag_row_offset = len * diag_idx;
         int curr_row_len = len - diag_idx;
         double *non_zero_diag_row = matrix_copy + diag_row_offset + diag_idx;
@@ -69,6 +68,7 @@ det(double *matrix, size_t len)
         double diag_elem = *non_zero_diag_row;
         mult_row(non_zero_diag_row, 1.0 / diag_elem, curr_row_len);
         det *= diag_elem;
+        printf("curr_det: %f, diag_elem: %f\n", det, diag_elem);
 
         // reset elements under diagonal to 0
         int col_idx = diag_idx;
@@ -201,7 +201,7 @@ main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &threads);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    size_t n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+    size_t n[N_MATRIX_LENS] = {2, 4, 8, 16, 32};
 
     double timer_mpi, avg_time, true_det, parallel_det;
     double *matrix;
