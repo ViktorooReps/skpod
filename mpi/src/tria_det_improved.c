@@ -72,7 +72,6 @@ det(double *matrix, size_t len)
 
     double det = 1.0;
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
-        print_matrix(matrix_copy, len);
         int diag_row_offset = len * diag_idx;
         int curr_row_len = len - diag_idx;
         double *non_zero_diag_row = matrix_copy + diag_row_offset + diag_idx;
@@ -81,7 +80,6 @@ det(double *matrix, size_t len)
         double diag_elem = *non_zero_diag_row;
         mult_row(non_zero_diag_row, 1.0 / diag_elem, curr_row_len);
         det *= diag_elem;
-        printf("curr_det: %f, diag_elem: %f\n", det, diag_elem);
 
         // reset elements under diagonal to 0
         int col_idx = diag_idx;
@@ -126,6 +124,8 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
     if (working_comm != MPI_COMM_NULL) {
         int working_rank;
         MPI_Comm_rank(working_comm, &working_rank);
+
+        printf("world: %d, work: %d\n", rank, working_rank);
 
         // distribute rows among working processes
         int *displacements = malloc(sizeof(int) * len);
