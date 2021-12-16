@@ -37,11 +37,11 @@ add_row(double *row_dest, double *row_to_add, size_t row_len)
 }
 
 void
-init_matrix(double *matrix, size_t len, double max_val)
+init_matrix(double *matrix, size_t len, double max_val, double min_val)
 {
     for (size_t i = 0; i < len; i++) {
         for (size_t j = 0; j < len; j++) {
-            matrix[i * len + j] = ((double)rand() / (double)RAND_MAX) * max_val;
+            matrix[i * len + j] = ((double)rand() / (double)RAND_MAX) * (max_val - min_val) + min_val;
         }
     }
 }
@@ -215,7 +215,7 @@ main(int argc, char **argv)
 
         if (!rank) {
             matrix = alloc_matrix(len);
-            init_matrix(matrix, len, MAX_DET_VALUE / len / len);
+            init_matrix(matrix, len, MAX_DET_VALUE / len / len, MAX_DET_VALUE / len / len / len);
             true_det = det(matrix, len);
         }
         avg_time = 0.0;
