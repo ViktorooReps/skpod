@@ -139,7 +139,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         for (int col_idx = 0; col_idx < len; ++col_idx) {
             printf("%f ", compute_rows[row_idx * len + col_idx]);
         }
-        printf("\n");
+        printf(" <- [%d]\n", working_rank);
     }
 
     free(displacements);
