@@ -190,13 +190,14 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
                     printf("[%d] recv from master\n", rank);
                 } else {
                     // master working process is normal process
-                    normal_matrix_half = matrix + overtime_threads * len;
+                    normal_matrix_half = matrix;
                     printf("[%d] i am the master!!\n", rank);
                 }
             }
 
             MPI_Datatype normal_rows;
             MPI_Type_vector(normal_load, len, len * working_threads, MPI_DOUBLE, &normal_rows);
+            MPI_Type_commit(&normal_rows);
 
             MPI_Scatter(normal_matrix_half, 1, normal_rows,
                         compute_rows, len * normal_load, MPI_DOUBLE,
@@ -224,6 +225,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
             MPI_Datatype overtime_rows;
             MPI_Type_vector(overtime_load, len, len * working_threads, MPI_DOUBLE, &overtime_rows);
+            MPI_Type_commit(&overtime_rows);
 
             MPI_Scatter(matrix, 1, overtime_rows,
                         compute_rows, len * overtime_load, MPI_DOUBLE,
