@@ -139,7 +139,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         double *compute_rows = malloc(sizeof(double) * len * assigned_rows);
         double *diag_row = malloc(sizeof(double) * len);
 
-        MPI_Barrier(working_comm);
         printf("[%d, %d]: scattering...\n", rank, working_rank);
         MPI_Scatterv(matrix, send_counts, displacements,
                      MPI_DOUBLE, compute_rows, assigned_rows,
@@ -176,6 +175,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
             // send new diagonal row to all processes
             printf("[%d, %d]: broadcasting...\n", rank, working_rank);
+            MPI_Barrier(working_comm);
             MPI_Bcast(non_zero_diag_row, curr_row_len, MPI_DOUBLE, diag_assigned_working_rank, working_comm);
             printf("[%d, %d]: broadcasted!\n", rank, working_rank);
 
