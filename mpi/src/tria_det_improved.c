@@ -68,7 +68,7 @@ double
 det(double *matrix, size_t len)
 {
     double *matrix_copy = alloc_matrix(len);
-    memcpy(matrix_copy, matrix, len * len * sizeof(int));
+    memcpy(matrix_copy, matrix, len * len * sizeof(double));
 
     double det = 1.0;
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
