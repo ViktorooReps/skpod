@@ -202,8 +202,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
     free(working_ranks);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
     return res;
 }
 
@@ -250,7 +248,6 @@ main(int argc, char **argv)
 
             if (!rank && !double_close(parallel_det, true_det)) {
                 printf("WRONG: (parallel) %f != %f (true)\n", parallel_det, true_det);
-                break;
             }
 
             avg_time += MPI_Wtime() - timer_mpi;
