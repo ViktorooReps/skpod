@@ -36,14 +36,33 @@ add_row(double *row_dest, double *row_to_add, size_t row_len)
     }
 }
 
+void
+init_matrix(double *matrix, size_t len, double max_val)
+{
+    for (size_t i = 0; i < len; i++) {
+        for (size_t j = 0; j < len; j++) {
+            matrix[i * len + j] = ((double)rand() / (double)RAND_MAX) * max_val;
+        }
+    }
+}
+
+double *
+alloc_matrix(size_t len)
+{
+    return malloc(sizeof(double) * len * len);
+}
+
 double
 det(double *matrix, size_t len)
 {
+    double *matrix_copy = alloc_matrix(len);
+    memcpy(matrix_copy, matrix, len * len * sizeof(int));
+
     double det = 1.0;
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
         int diag_row_offset = len * diag_idx;
         int curr_row_len = len - diag_idx;
-        double *non_zero_diag_row = matrix + diag_row_offset + diag_idx;
+        double *non_zero_diag_row = matrix_copy + diag_row_offset + diag_idx;
 
         // reset diagonal element to 1.0
         double diag_elem = *non_zero_diag_row;
@@ -54,7 +73,7 @@ det(double *matrix, size_t len)
         int col_idx = diag_idx;
         for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
             int row_offset = row_idx * len;
-            double *non_zero_row = matrix + row_offset + col_idx;
+            double *non_zero_row = matrix_copy + row_offset + col_idx;
 
             double elem = *non_zero_row;
             mult_row(non_zero_row, -1.0 / elem, curr_row_len);
@@ -63,6 +82,8 @@ det(double *matrix, size_t len)
             add_row(non_zero_row, non_zero_diag_row, curr_row_len);
         }
     }
+
+    free(matrix_copy);
     return det;
 }
 
@@ -166,22 +187,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
     free(working_ranks);
 
     return res;
-}
-
-void
-init_matrix(double *matrix, size_t len, double max_val)
-{
-    for (size_t i = 0; i < len; i++) {
-        for (size_t j = 0; j < len; j++) {
-            matrix[i * len + j] = ((double)rand() / (double)RAND_MAX) * max_val;
-        }
-    }
-}
-
-double *
-alloc_matrix(size_t len)
-{
-    return malloc(sizeof(double) * len * len);
 }
 
 int
