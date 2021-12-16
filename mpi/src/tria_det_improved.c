@@ -186,9 +186,11 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
                     normal_matrix_half = malloc(sizeof(double) * buf_size);
                     MPI_Recv(normal_matrix_half, buf_size, MPI_DOUBLE,
                              MASTER_RANK, NO_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    printf("[%d] recv from master\n", rank);
                 } else {
                     // master working process is normal process
                     normal_matrix_half = matrix + overtime_threads * len;
+                    printf("[%d] i am the master!!\n", rank);
                 }
             }
 
@@ -198,6 +200,9 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             MPI_Scatter(normal_matrix_half, 1, normal_rows,
                         compute_rows, len * normal_load, MPI_DOUBLE,
                         MASTER_RANK, normal_comm);
+            if (!normal_rank) {
+                printf("[%d] normal scatter\n", rank);
+            }
 
             MPI_Type_free(&normal_rows);
 
@@ -222,19 +227,11 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             MPI_Scatter(matrix, 1, overtime_rows,
                         compute_rows, len * overtime_load, MPI_DOUBLE,
                         MASTER_RANK, overtime_comm);
+            if (!overtime_rank) {
+                printf("[%d] overtime scatter\n", rank);
+            }
 
             MPI_Type_free(&overtime_rows);
-        }
-
-        if (!rank) {
-            print_matrix(matrix, len);
-        }
-        printf("[%d] compute_rows:\n", working_rank);
-        for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
-            for (int col_idx = 0; col_idx < len; ++col_idx) {
-                printf("%f ", compute_rows[row_idx * len + col_idx]);
-            }
-            printf("\n");
         }
 
         // everything is ready for determinant computation
@@ -260,14 +257,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
                 // copy computed row to buffer
                 memcpy(non_zero_diag_row, non_zero_compute_row, curr_row_len * sizeof(double));
-            }
-
-            printf("[%d, %d] compute_rows:\n", working_rank, diag_idx);
-            for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
-                for (int col_idx = 0; col_idx < len; ++col_idx) {
-                    printf("%f ", compute_rows[row_idx * len + col_idx]);
-                }
-                printf("\n");
             }
 
             // send new diagonal row to all processes
