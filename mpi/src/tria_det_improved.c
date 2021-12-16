@@ -39,9 +39,9 @@ add_row(double *row_dest, double *row_to_add, size_t row_len)
 void
 init_matrix(double *matrix, size_t len, double max_val, double min_val)
 {
-    for (size_t i = 0; i < len; i++) {
-        for (size_t j = 0; j < len; j++) {
-            matrix[i * len + j] = ((double)rand() / (double)RAND_MAX) * (max_val - min_val) + min_val;
+    for (size_t row_idx = 0; row_idx < len; ++row_idx) {
+        for (size_t col_idx = 0; col_idx < len; ++col_idx) {
+            matrix[row_idx * len + col_idx] = ((double)rand() / (double)RAND_MAX) * (max_val - min_val) + min_val;
         }
     }
 }
@@ -55,6 +55,7 @@ alloc_matrix(size_t len)
 void
 print_matrix(double *matrix, size_t len)
 {
+    printf("\n");
     for (int row_idx = 0; row_idx < len; ++row_idx) {
         for (int col_idx = 0; col_idx < len; ++col_idx) {
             printf("%f ", matrix[row_idx * len + col_idx]);
