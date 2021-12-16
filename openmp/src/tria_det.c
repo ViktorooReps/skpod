@@ -5,7 +5,7 @@
 #include <omp.h>
 
 #define N_RUNS 10
-#define N_MATRIX_LENS 10
+#define N_MATRIX_LENS 12
 #define SEED 42
 #define MAX_DET_VALUE 10000.0
 #define MASTER_RANK 0
@@ -106,7 +106,7 @@ main(int argc, char **argv)
     }
 
     double **matrix;
-    int n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+    size_t n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096};
     int threads;
     sscanf(argv[1], "%d", &threads);
     double timer_omp, avg_time, maxval;
