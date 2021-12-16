@@ -175,7 +175,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         }
     }
 
-    MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, working_comm);
+    MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, MPI_COMM_WORLD);
 
     free(diag_row);
     free(compute_rows);
