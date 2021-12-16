@@ -139,11 +139,20 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         double *compute_rows = malloc(sizeof(double) * len * assigned_rows);
         double *diag_row = malloc(sizeof(double) * len);
 
-        printf("[%d, %d, len: %zu]: scattering...\n", rank, working_rank, len);
         MPI_Scatterv(matrix, send_counts, displacements,
                      MPI_DOUBLE, compute_rows, assigned_rows,
                      MPI_DOUBLE, MASTER_RANK, working_comm);
-        printf("[%d, %d, len: %zu]: scattered!\n", rank, working_rank, len);
+
+        if (!rank) {
+            print_matrix(matrix, len);
+        }
+        printf("[%d] compute_rows:\n", working_rank);
+        for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
+            for (int col_idx = 0; col_idx < len; ++col_idx) {
+                printf("%f ", compute_rows[row_idx * len + col_idx])
+            }
+            printf("\n");
+        }
 
         free(displacements);
         free(send_counts);
@@ -174,9 +183,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             }
 
             // send new diagonal row to all processes
-            printf("[world: %d, work: %d, idx: %d, len: %zu]: broadcasting from %d row of len %d...\n", rank, working_rank, diag_idx, len, diag_assigned_working_rank, curr_row_len);
             MPI_Bcast(non_zero_diag_row, curr_row_len, MPI_DOUBLE, diag_assigned_working_rank, working_comm);
-            printf("[world: %d, work: %d, idx: %d, len: %zu]: broadcasted!\n", rank, working_rank, diag_idx, len);
 
             // reset elements under diagonal to 0 for all assigned rows
             for (int row_idx = 0; row_idx < assigned_rows; ++row_idx) {
