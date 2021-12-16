@@ -188,7 +188,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             MPI_Datatype normal_rows;
             MPI_Type_vector(normal_load, len, len * working_threads, MPI_DOUBLE, &normal_rows);
             MPI_Datatype normal_rows_resized;
-            MPI_Type_create_resized(normal_rows, 0, len, &normal_rows_resized);
+            MPI_Type_create_resized(normal_rows, 0, len * sizeof(double), &normal_rows_resized);
             MPI_Type_commit(&normal_rows_resized);
 
             MPI_Scatter(normal_matrix_half, 1, normal_rows_resized,
@@ -213,7 +213,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             MPI_Datatype overtime_rows;
             MPI_Type_vector(overtime_load, len, len * working_threads, MPI_DOUBLE, &overtime_rows);
             MPI_Datatype overtime_rows_resized;
-            MPI_Type_create_resized(overtime_rows, 0, len, &overtime_rows_resized);
+            MPI_Type_create_resized(overtime_rows, 0, len * sizeof(double), &overtime_rows_resized);
             MPI_Type_commit(&overtime_rows_resized);
 
             MPI_Scatter(matrix, 1, overtime_rows_resized,
