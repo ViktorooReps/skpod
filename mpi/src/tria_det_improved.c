@@ -190,7 +190,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             MPI_Datatype normal_rows_resized;
             MPI_Type_create_resized(normal_rows, 0, len, &normal_rows_resized);
             MPI_Type_commit(&normal_rows_resized);
-            MPI_Type_commit(&normal_rows_resized);
 
             MPI_Scatter(normal_matrix_half, 1, normal_rows_resized,
                         compute_rows, len * normal_load, MPI_DOUBLE,
