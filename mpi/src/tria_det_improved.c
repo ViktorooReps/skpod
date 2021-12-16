@@ -105,10 +105,6 @@ det(double *matrix, size_t len)
 double
 mpi__det(double *matrix, size_t len, size_t threads, int rank)
 {
-    if (!rank) {
-        printf("len: %zu\n", len);
-    }
-
     double res = 1.0;
 
     int working_threads = ((threads > len)? len : threads);
@@ -164,10 +160,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         MPI_Comm overtime_comm;
         MPI_Comm_create_group(working_comm, overtime_group, 3, &overtime_comm);
 
-        if (!rank) {
-            printf("working: %d, normal: %d, overtime: %d\n", working_threads, normal_threads, overtime_threads);
-        }
-
         // distribute rows among working processes
 
         int assigned_rows = ((rank < overtime_threads)? overtime_load : normal_load);
@@ -187,11 +179,9 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
                     normal_matrix_half = malloc(sizeof(double) * buf_size);
                     MPI_Recv(normal_matrix_half, buf_size, MPI_DOUBLE,
                              MASTER_RANK, NO_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    printf("[%d] recv from master\n", rank);
                 } else {
                     // master working process is normal process
                     normal_matrix_half = matrix;
-                    printf("[%d] i am the master!!\n", rank);
                 }
             }
 
@@ -202,9 +192,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             MPI_Scatter(normal_matrix_half, 1, normal_rows,
                         compute_rows, len * normal_load, MPI_DOUBLE,
                         MASTER_RANK, normal_comm);
-            if (!normal_rank) {
-                printf("[%d] normal scatter\n", rank);
-            }
 
             MPI_Type_free(&normal_rows);
 
@@ -230,9 +217,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             MPI_Scatter(matrix, 1, overtime_rows,
                         compute_rows, len * overtime_load, MPI_DOUBLE,
                         MASTER_RANK, overtime_comm);
-            if (!overtime_rank) {
-                printf("[%d] overtime scatter\n", rank);
-            }
 
             MPI_Type_free(&overtime_rows);
         }
