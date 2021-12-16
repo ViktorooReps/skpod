@@ -102,7 +102,7 @@ det(double *matrix, size_t len)
 }
 
 double
-omp__det(double *matrix, size_t len)
+omp__det(double *matrix, size_t len, int threads)
 {
     int diag_idx, col_idx, row_idx;
     double *matrix_copy = alloc_matrix(len), non_zero_diag_row, non_zero_row;
@@ -166,7 +166,7 @@ main(int argc, char **argv)
             if (threads < 2) {
                 parallel_det = det(matrix, len);
             } else {
-                parallel_det = omp__det(matrix, len, threads, rank);
+                parallel_det = omp__det(matrix, len, threads);
             }
 
             if (!double_close(parallel_det, true_det)) {
