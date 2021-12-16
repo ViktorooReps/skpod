@@ -205,7 +205,7 @@ main(int argc, char **argv)
     }
 
     size_t len;
-    for (int i = 0; i < N_MATRIX_LENS; i++)
+    for (int i = 0; i < N_MATRIX_LENS; i++) {
         len = n[i];
 
         if (!rank) {
@@ -230,7 +230,7 @@ main(int argc, char **argv)
         avg_time /= (double)N_RUNS;
 
         if (!rank) {
-            printf("%d\t%d\t%f\n", len, threads, avg_time);
+            printf("%zu\t%d\t%f\n", len, threads, avg_time);
             free(matrix);
         }
     }
