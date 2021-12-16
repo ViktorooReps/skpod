@@ -105,9 +105,6 @@ det(double *matrix, size_t len)
 double
 mpi__det(double *matrix, size_t len, size_t threads, int rank)
 {
-    MPI_Group world_group;
-    MPI_Comm_group(MPI_COMM_WORLD, &world_group);
-
     if (!rank) {
         printf("len: %zu\n", len);
     }
@@ -137,6 +134,9 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
     int normal_master_rank = overtime_threads;
     int normal_rows_offset = overtime_threads * len;
+
+    MPI_Group world_group;
+    MPI_Comm_group(MPI_COMM_WORLD, &world_group);
 
     // all working processes
     MPI_Group working_group;
