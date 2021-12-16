@@ -9,7 +9,9 @@
 #define N_MATRIX_LENS 3
 #define SEED 42
 #define MAX_DET_VALUE 10.0
+
 #define MASTER_RANK 0
+#define NO_TAG 0
 
 #define EPS 1e-07
 #define ABS(a) ((a) < 0 ? -(a) : (a))
@@ -109,39 +111,112 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
     double res = 1.0;
 
     int working_threads = ((threads > len)? len : threads);
+    int overtime_threads = len % working_threads;
+    int normal_threads = working_threads - overtime_threads;
+
+    int normal_load = len / working_threads;
+    int overtime_load = normal_load + 1;
+
     int *working_ranks = malloc(sizeof(int) * working_threads);
+    int *overtime_ranks = malloc(sizeof(int) * overtime_threads);
+    int *normal_ranks = malloc(sizeof(int) * normal_threads);
 
     for (int worker_idx = 0; worker_idx < working_threads; ++worker_idx) {
+        if (worker_idx < overtime_threads) {
+            overtime_ranks[worker_idx] = worker_idx;
+        } else {
+            int normal_idx = worker_idx - overtime_threads;
+            normal_ranks[normal_idx] = worker_idx;
+        }
         working_ranks[worker_idx] = worker_idx;
     }
 
+    int normal_master_rank = overtime_threads;
+    int normal_rows_offset = overtime_threads * len;
+
+    // all working processes
     MPI_Group working_group;
     MPI_Group_incl(world_group, working_threads, working_ranks, &working_group);
 
     MPI_Comm working_comm;
     MPI_Comm_create_group(MPI_COMM_WORLD, working_group, 0, &working_comm);
 
+    // processes with normal_load assigned rows
+    MPI_Group normal_group;
+    MPI_Group_incl(working_group, normal_threads, normal_ranks, &normal_group);
+
+    MPI_Comm normal_comm;
+    MPI_Comm_create_group(working_comm, normal_group, 0, &normal_comm);
+
+    // processes with overtime_load assigned rows
+    MPI_Group overtime_group;
+    MPI_Group_incl(working_group, overtime_threads, overtime_ranks, &overtime_group);
+
+    MPI_Comm overtime_comm;
+    MPI_Comm_create_group(working_comm, overtime_group, 0, &overtime_comm);
+
     if (working_comm != MPI_COMM_NULL) {
         int working_rank;
         MPI_Comm_rank(working_comm, &working_rank);
 
         // distribute rows among working processes
-        int *displacements = malloc(sizeof(int) * len);
-        int *send_counts = malloc(sizeof(int) * len);
 
-        for (int row_idx = 0; row_idx < len; ++row_idx) {
-            send_counts[row_idx] = len;
-            displacements[row_idx] = row_idx % working_threads;
-        }
-
-        int assigned_rows = len / working_threads + (rank < (len % working_threads));
+        int assigned_rows = ((rank < overtime_threads)? overtime_load : normal_load);
 
         double *compute_rows = malloc(sizeof(double) * len * assigned_rows);
         double *diag_row = malloc(sizeof(double) * len);
 
-        MPI_Scatterv(matrix, send_counts, displacements,
-                     MPI_DOUBLE, compute_rows, assigned_rows,
-                     MPI_DOUBLE, MASTER_RANK, working_comm);
+        if (normal_comm != MPI_COMM_NULL) {
+            int normal_rank;
+            MPI_Comm_rank(normal_comm, &normal_rank);
+
+            double *normal_matrix_half;
+            if (!normal_rank) {
+                if (normal_threads != working_threads) {
+                    // receive matrix from master working process
+                    int buf_size = len * len - normal_rows_offset;
+                    normal_matrix_half = malloc(sizeof(double) * buf_size);
+                    MPI_Recv(normal_matrix_half, buf_size, MPI_DOUBLE,
+                             MASTER_RANK, NO_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                } else {
+                    // master working process is normal process
+                    normal_matrix_half = matrix + overtime_threads * len;
+                }
+            }
+
+            MPI_Datatype normal_rows;
+            MPI_Type_vector(normal_load, len, len * working_threads, MPI_DOUBLE, &normal_rows);
+
+            MPI_Scatter(normal_matrix_half, 1, normal_rows,
+                        compute_rows, len * normal_load, MPI_DOUBLE,
+                        MASTER_RANK, normal_comm);
+
+            MPI_Type_free(&normal_rows);
+
+            if (!normal_rank && normal_threads != working_threads) {
+                free(normal_matrix_half);
+            }
+        }
+
+        if (overtime_comm != MPI_COMM_NULL) {
+            int overtime_rank;
+            MPI_Comm_rank(overtime_comm, &overtime_rank);
+
+            if (!overtime_rank) {
+                // send matrix to master normal process
+                MPI_Send(matrix + normal_rows_offset, len * len - normal_rows_offset, MPI_DOUBLE,
+                         normal_master_rank, NO_TAG, MPI_COMM_WORLD);
+            }
+
+            MPI_Datatype overtime_rows;
+            MPI_Type_vector(overtime_load, len, len * working_threads, MPI_DOUBLE, &overtime_rows);
+
+            MPI_Scatter(matrix, 1, overtime_rows,
+                        compute_rows, len * overtime_load, MPI_DOUBLE,
+                        MASTER_RANK, overtime_comm);
+
+            MPI_Type_free(&overtime_rows);
+        }
 
         if (!rank) {
             print_matrix(matrix, len);
@@ -214,8 +289,12 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
 
     MPI_Group_free(&world_group);
     MPI_Group_free(&working_group);
+    MPI_Group_free(&overtime_group);
+    MPI_Group_free(&normal_group);
 
     free(working_ranks);
+    free(overtime_ranks);
+    free(normal_ranks);
 
     return res;
 }

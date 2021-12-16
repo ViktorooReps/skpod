@@ -109,13 +109,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
     int working_rank = rank;
 
     // distribute rows among working processes
-    int *displacements = malloc(sizeof(int) * len);
-    int *send_counts = malloc(sizeof(int) * len);
-
-    for (int row_idx = 0; row_idx < len; ++row_idx) {
-        send_counts[row_idx] = len;
-        displacements[row_idx] = row_idx % working_threads;
-    }
 
     int assigned_rows;
     if (rank < working_threads) {
@@ -124,11 +117,19 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         assigned_rows = 0;
     }
 
+    int *displacements = malloc(sizeof(int) * assigned_rows);
+    int *send_counts = malloc(sizeof(int) * len);
+
+    for (int row_idx = 0; row_idx < len; ++row_idx) {
+        send_counts[row_idx] = len;
+        displacements[row_idx] = row_idx % working_threads;
+    }
+
     double *compute_rows = malloc(sizeof(double) * len * assigned_rows);
     double *diag_row = malloc(sizeof(double) * len);
 
     MPI_Scatterv(matrix, send_counts, displacements,
-                 MPI_DOUBLE, compute_rows, assigned_rows * len * sizeof(double),
+                 MPI_DOUBLE, compute_rows, assigned_rows * len,
                  MPI_DOUBLE, MASTER_RANK, MPI_COMM_WORLD);
 
     if (!rank) {
