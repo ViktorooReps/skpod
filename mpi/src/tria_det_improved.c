@@ -11,6 +11,15 @@
 #define MAX_DET_VALUE 10000.0
 #define MASTER_RANK 0
 
+#define EPS 1e-07
+#define ABS(a) ((a) < 0 ? -(a) : (a))
+
+int
+double_close(double num1, double num2)
+{
+    return ABS(num1 - num2) < EPS;
+}
+
 void
 mult_row(double *row, double num, size_t row_len)
 {
@@ -148,7 +157,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, working_comm);
 
         free(diag_row);
-        free(compute_row);
+        free(compute_rows);
     }
 
     MPI_Group_free(&world_group);
@@ -212,7 +221,7 @@ main(int argc, char **argv)
 
             parallel_det = ((threads < 2)? det(matrix, len) : mpi__det(matrix, len, threads, rank));
             if (!rank && !double_close(parallel_det, true_det)) {
-                printf("WRONG: (parallel) %d != %d (true)\n", parallel_det, true_det);
+                printf("WRONG: (parallel) %f != %f (true)\n", parallel_det, true_det);
                 break;
             }
 
