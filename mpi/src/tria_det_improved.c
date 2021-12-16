@@ -139,6 +139,7 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         double *compute_rows = malloc(sizeof(double) * len * assigned_rows);
         double *diag_row = malloc(sizeof(double) * len);
 
+        MPI_Barrier(working_comm);
         printf("[%d, %d]: scattering...\n", rank, working_rank);
         MPI_Scatterv(matrix, send_counts, displacements,
                      MPI_DOUBLE, compute_rows, assigned_rows,
