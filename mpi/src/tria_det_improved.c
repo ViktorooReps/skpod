@@ -141,12 +141,12 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
         double *compute_rows = malloc(sizeof(double) * len * assigned_rows);
         double *diag_row = malloc(sizeof(double) * len);
 
-        free(displacements);
-        free(send_counts);
-
         MPI_Scatterv(matrix, send_counts, displacements,
                      MPI_DOUBLE, compute_rows, assigned_rows,
                      MPI_DOUBLE, MASTER_RANK, working_comm);
+
+        free(displacements);
+        free(send_counts);
 
         // everything is ready for determinant computation
         double det = 1.0;
