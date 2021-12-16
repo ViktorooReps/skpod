@@ -229,9 +229,6 @@ mpi__det(double *matrix, size_t len, size_t threads, int rank)
             printf("\n");
         }
 
-        free(displacements);
-        free(send_counts);
-
         // everything is ready for determinant computation
         double det = 1.0;
         double *non_zero_diag_row;
