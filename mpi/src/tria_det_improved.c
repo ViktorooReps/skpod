@@ -6,7 +6,7 @@
 #include <mpi.h>
 
 #define N_RUNS 10
-#define N_MATRIX_LENS 4
+#define N_MATRIX_LENS 3
 #define SEED 42
 #define MAX_DET_VALUE 10.0
 #define MASTER_RANK 0
@@ -213,7 +213,7 @@ main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &threads);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    size_t n[N_MATRIX_LENS] = {2, 4, 8, 16};
+    size_t n[N_MATRIX_LENS] = {2, 4, 8};
 
     double timer_mpi, avg_time, true_det, parallel_det;
     double *matrix;
