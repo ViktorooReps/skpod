@@ -115,7 +115,6 @@ omp__det(double *matrix, size_t len, int threads)
     memcpy(matrix_copy, matrix, len * len * sizeof(double));
 
     double det = 1.0, elem;
-#pragma omp parallel for private(diag_idx, row_idx, elem, len) shared(matrix_copy, det) num_threads(threads)
     for (diag_idx = 0; diag_idx < len; ++diag_idx) {
         // reset diagonal element to 1.0
         elem = matrix_copy[len * diag_idx + diag_idx];
@@ -123,6 +122,7 @@ omp__det(double *matrix, size_t len, int threads)
         det *= elem;
 
         // reset elements under diagonal to 0
+#pragma omp parallel for private(diag_idx, row_idx, elem, len) shared(matrix_copy, det) num_threads(threads)
         for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
             elem = matrix_copy[row_idx * len + diag_idx];
             mult_row(matrix_copy + row_idx * len + diag_idx, -1.0 / elem, len - diag_idx);
