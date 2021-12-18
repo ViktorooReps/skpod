@@ -17,6 +17,9 @@ class Machine:
     BLUEGENE = 'bluegene'
 
 
+OUTPUT_TAG = '<OUTPUT\n>'
+
+
 def mpixlc_compile(src_filename, args):
     compiler = 'mpixlc'
     args = [compiler] + list(args) + [str(src_filename)]
@@ -73,7 +76,7 @@ def wait(res_filename):
         if os.path.isfile(out_file):
             with open(out_file) as f:
                 contents = f.read()
-            finished = finished or len(contents.split('<OUTPUT>')) == 3
+            finished = finished or len(contents.split(OUTPUT_TAG)) == 3
 
         if os.path.isfile(err_file):
             with open(err_file) as f:
@@ -87,8 +90,8 @@ def collect_results(res_filename):
     with open(res_filename + '.out') as f:
         res = f.read()
 
-    if '<OUTPUT>\n' in res:
-        return res.split('<OUTPUT>')[1]
+    if OUTPUT_TAG in res:
+        return res.split(OUTPUT_TAG)[1]
     else:
         with open(res_filename + '.err') as f:
             err_text = f.read()

@@ -210,7 +210,7 @@ main(int argc, char **argv)
     double timer_mpi, avg_time, maxval;
     if (!rank) {
         printf("running on %d processes\n", threads);
-        printf("<OUTPUT>");
+        printf("<OUTPUT>\n");
     }
 
     for (int i = 0; i < N_MATRIX_LENS; i++) {
@@ -247,7 +247,7 @@ main(int argc, char **argv)
         }
     }
     if (!rank) {
-        printf("<OUTPUT>");
+        printf("<OUTPUT>\n");
     }
     MPI_Finalize();
     return 0;

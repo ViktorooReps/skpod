@@ -220,7 +220,7 @@ main(int argc, char **argv)
     double *matrix;
     if (!rank) {
         printf("running on %d processes\n", threads);
-        printf("<OUTPUT>");
+        printf("<OUTPUT>\n");
     }
 
     size_t len;
@@ -260,7 +260,7 @@ main(int argc, char **argv)
     }
 
     if (!rank) {
-        printf("<OUTPUT>");
+        printf("<OUTPUT>\n");
     }
 
     MPI_Finalize();
