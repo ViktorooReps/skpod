@@ -12,6 +12,10 @@ class NoOutputException(Exception):
     pass
 
 
+class CompilationError(Exception):
+    pass
+
+
 class Machine:
     POLUS = 'polus'
     BLUEGENE = 'bluegene'
@@ -26,7 +30,13 @@ def mpixlc_compile(src_filename, args):
 
     logger.info('Compiling ' + src_filename + ' with ' + str(args) + ' arguments...')
     res = os.system(' '.join(args))
-    logger.info('Compilation finished ' + str(os.WEXITSTATUS(res)))
+    exit_status = os.WEXITSTATUS(res)
+
+    if not exit_status:
+        logger.info('Compilation finished successfully!')
+    else:
+        logger.info('Compilation failed with exit status ' + str(exit_status) + '!')
+        raise CompilationError
 
 
 def xlc_compile(src_filename, args):
@@ -35,7 +45,13 @@ def xlc_compile(src_filename, args):
 
     logger.info('Compiling ' + src_filename + ' with ' + str(args) + ' arguments...')
     res = os.system(' '.join(args))
-    logger.info('Compilation finished ' + str(os.WEXITSTATUS(res)))
+    exit_status = os.WEXITSTATUS(res)
+
+    if not exit_status:
+        logger.info('Compilation finished successfully!')
+    else:
+        logger.info('Compilation failed with exit status ' + str(exit_status) + '!')
+        raise CompilationError
 
 
 def schedule(machine, n_processes, exec_file, res_filename, use_threads=False):
