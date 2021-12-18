@@ -109,21 +109,29 @@ omp__det(double *matrix, size_t len, int threads)
 
     double det = 1.0;
     int diag_idx, row_idx;
-#pragma omp parallel for private(diag_idx, row_idx) shared(matrix_copy, det) num_threads(threads)
-    for (diag_idx = 0; diag_idx < len; ++diag_idx) {
-        // reset diagonal element to 1.0
-        double diag_elem = matrix_copy[len * diag_idx + diag_idx];
-        mult_row(matrix_copy + len * diag_idx + diag_idx, 1.0 / diag_elem, len - diag_idx);
-        det *= diag_elem;
+    #pragma omp parallel shared(matrix_copy) private(det) reduction(* : det) num_threads(threads)
+    {
+        for (diag_idx = 0; diag_idx < len; ++diag_idx) {
+            // reset diagonal element to 1.0
+            #pragma omp single
+            {
+                double diag_elem = matrix_copy[len * diag_idx + diag_idx];
+                mult_row(matrix_copy + len * diag_idx + diag_idx, 1.0 / diag_elem, len - diag_idx);
+                det *= diag_elem;
+            }
 
-        // reset elements under diagonal to 0
-        for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
-            double elem = matrix_copy[row_idx * len + diag_idx];
-            mult_row(matrix_copy + row_idx * len + diag_idx, -1.0 / elem, len - diag_idx);
-            det *= -1.0 * elem;
+            #pragma omp barrier
 
-            add_row(matrix_copy + row_idx * len + diag_idx, matrix_copy + len * diag_idx + diag_idx,
-                    len - diag_idx);
+            // reset elements under diagonal to 0
+            #pragma omp for schedule(static)
+            for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
+                double elem = matrix_copy[row_idx * len + diag_idx];
+                mult_row(matrix_copy + row_idx * len + diag_idx, -1.0 / elem, len - diag_idx);
+                det *= -1.0 * elem;
+
+                add_row(matrix_copy + row_idx * len + diag_idx, matrix_copy + len * diag_idx + diag_idx,
+                        len - diag_idx);
+            }
         }
     }
 
