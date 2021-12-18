@@ -51,12 +51,6 @@ init_matrix(double *matrix, size_t len, double max_val)
     }
 }
 
-double *
-alloc_matrix(size_t len)
-{
-    return malloc(sizeof(double) * len * len);
-}
-
 void
 print_matrix(double *matrix, size_t len)
 {
@@ -72,7 +66,7 @@ print_matrix(double *matrix, size_t len)
 double
 det(double *matrix, size_t len)
 {
-    double *matrix_copy = alloc_matrix(len);
+    double *matrix_copy = malloc(sizeof(double) * len * len);
     memcpy(matrix_copy, matrix, len * len * sizeof(double));
 
     double det = 1.0;
@@ -305,7 +299,7 @@ main(int argc, char **argv)
     size_t len = INIT_LEN;
     while (avg_time < TIME_LIMIT) {
         if (!rank) {
-            matrix = alloc_matrix(len);
+            matrix = malloc(sizeof(double) * len * len);
             init_matrix(matrix, len, MAX_DET_VALUE / len / len);
             true_det = det(matrix, len);
         }

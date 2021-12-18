@@ -52,12 +52,6 @@ init_matrix(double *matrix, size_t len, double max_val)
     }
 }
 
-double *
-alloc_matrix(size_t len)
-{
-    return malloc(sizeof(double) * len * len);
-}
-
 void
 print_matrix(double *matrix, size_t len)
 {
@@ -74,7 +68,7 @@ print_matrix(double *matrix, size_t len)
 double
 det(double *matrix, size_t len)
 {
-    double *matrix_copy = alloc_matrix(len);
+    double *matrix_copy = malloc(sizeof(double) * len * len);
     memcpy(matrix_copy, matrix, len * len * sizeof(double));
 
     double det = 1.0;
@@ -110,21 +104,21 @@ det(double *matrix, size_t len)
 double
 omp__det(double *matrix, size_t len, int threads)
 {
-    int diag_idx, row_idx;
-    double *matrix_copy = alloc_matrix(len);
+    double *matrix_copy = malloc(sizeof(double) * len * len);
     memcpy(matrix_copy, matrix, len * len * sizeof(double));
 
-    double det = 1.0, elem;
+    double det = 1.0;
+    int diag_idx, row_idx;
+#pragma omp parallel for private(diag_idx, row_idx) shared(matrix_copy, det) num_threads(threads)
     for (diag_idx = 0; diag_idx < len; ++diag_idx) {
         // reset diagonal element to 1.0
-        elem = matrix_copy[len * diag_idx + diag_idx];
-        mult_row(matrix_copy + len * diag_idx + diag_idx, 1.0 / elem, len - diag_idx);
-        det *= elem;
+        double diag_elem = matrix_copy[len * diag_idx + diag_idx];
+        mult_row(matrix_copy + len * diag_idx + diag_idx, 1.0 / diag_elem, len - diag_idx);
+        det *= diag_elem;
 
         // reset elements under diagonal to 0
-#pragma omp parallel for private(diag_idx, row_idx, elem, len) shared(matrix_copy, det) num_threads(threads)
         for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
-            elem = matrix_copy[row_idx * len + diag_idx];
+            double elem = matrix_copy[row_idx * len + diag_idx];
             mult_row(matrix_copy + row_idx * len + diag_idx, -1.0 / elem, len - diag_idx);
             det *= -1.0 * elem;
 
@@ -154,7 +148,7 @@ main(int argc, char **argv)
     size_t len = INIT_LEN;
     int run_idx;
     while (avg_time < TIME_LIMIT) {
-        matrix = alloc_matrix(len);
+        matrix = malloc(sizeof(double) * len * len);
         init_matrix(matrix, len, MAX_DET_VALUE / len / len);
         true_det = det(matrix, len);
 
