@@ -24,16 +24,18 @@ double_close(double num1, double num2)
 void
 mult_row(double *row, double num, size_t row_len)
 {
-    for (int i = 0; i < row_len; ++i) {
-        row[i] *= num;
+    int col_idx;
+    for (col_idx = 0; col_idx < row_len; ++col_idx) {
+        row[col_idx] *= num;
     }
 }
 
 void
 add_row(double *row_dest, double *row_to_add, size_t row_len)
 {
-    for (int i = 0; i < row_len; ++i) {
-        row_dest[i] += row_to_add[i];
+    int col_idx;
+    for (col_idx = 0; col_idx < row_len; ++col_idx) {
+        row_dest[col_idx] += row_to_add[col_idx];
     }
 }
 
@@ -41,8 +43,9 @@ add_row(double *row_dest, double *row_to_add, size_t row_len)
 void
 init_matrix(double *matrix, size_t len, double max_val)
 {
-    for (size_t row_idx = 0; row_idx < len; ++row_idx) {
-        for (size_t col_idx = 0; col_idx < len; ++col_idx) {
+    int row_idx, col_idx;
+    for (row_idx = 0; row_idx < len; ++row_idx) {
+        for (col_idx = 0; col_idx < len; ++col_idx) {
             matrix[row_idx * len + col_idx] = ((double)rand() / (double)RAND_MAX) * max_val;
         }
     }
@@ -58,8 +61,9 @@ void
 print_matrix(double *matrix, size_t len)
 {
     printf("\n");
-    for (int row_idx = 0; row_idx < len; ++row_idx) {
-        for (int col_idx = 0; col_idx < len; ++col_idx) {
+    int row_idx, col_idx;
+    for (row_idx = 0; row_idx < len; ++row_idx) {
+        for (col_idx = 0; col_idx < len; ++col_idx) {
             printf("%f ", matrix[row_idx * len + col_idx]);
         }
         printf("\n");
@@ -73,7 +77,8 @@ det(double *matrix, size_t len)
     memcpy(matrix_copy, matrix, len * len * sizeof(double));
 
     double det = 1.0;
-    for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
+    int diag_idx, row_idx;
+    for (diag_idx = 0; diag_idx < len; ++diag_idx) {
         int diag_row_offset = len * diag_idx;
         int curr_row_len = len - diag_idx;
         double *non_zero_diag_row = matrix_copy + diag_row_offset + diag_idx;
@@ -85,7 +90,7 @@ det(double *matrix, size_t len)
 
         // reset elements under diagonal to 0
         int col_idx = diag_idx;
-        for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
+        for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
             int row_offset = row_idx * len;
             double *non_zero_row = matrix_copy + row_offset + col_idx;
 
