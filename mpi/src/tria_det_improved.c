@@ -5,7 +5,7 @@
 #include <float.h>
 #include <mpi.h>
 
-#define TIME_LIMIT 5.0
+#define TIME_LIMIT 3.0
 #define INIT_LEN 2
 #define LEN_MULTIPLIER 2
 #define LEN_STEP 0
