@@ -155,7 +155,7 @@ main(int argc, char **argv)
     sscanf(argv[1], "%d", &threads);
 
     printf("running on %d threads\n", threads);
-    printf("<OUTPUT>");
+    printf("<OUTPUT>\n");
 
     size_t len;
     int len_idx, run_idx;
@@ -188,6 +188,6 @@ main(int argc, char **argv)
         free(matrix);
     }
 
-    printf("<OUTPUT>");
+    printf("<OUTPUT>\n");
     return 0;
 }

@@ -87,7 +87,7 @@ def collect_results(res_filename):
     with open(res_filename + '.out') as f:
         res = f.read()
 
-    if '<OUTPUT>' in res:
+    if '<OUTPUT>\n' in res:
         return res.split('<OUTPUT>')[1]
     else:
         with open(res_filename + '.err') as f:
