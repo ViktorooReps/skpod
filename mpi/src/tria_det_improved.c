@@ -5,11 +5,11 @@
 #include <float.h>
 #include <mpi.h>
 
-#define TIME_LIMIT 10
+#define TIME_LIMIT 5.0
 #define INIT_LEN 2
 #define LEN_MULTIPLIER 2
 #define LEN_STEP 0
-#define N_RUNS 10
+#define N_RUNS 5
 #define SEED 42
 #define MAX_DET_VALUE 10.0
 
