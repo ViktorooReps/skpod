@@ -21,7 +21,7 @@ class Machine:
     BLUEGENE = 'bluegene'
 
 
-OUTPUT_TAG = '<OUTPUT\n>'
+OUTPUT_TAG = '<OUTPUT>\n'
 
 
 def mpixlc_compile(src_filename, args):
