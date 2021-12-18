@@ -3,10 +3,10 @@ import os
 
 import sys
 
-from utils import create_parser, xlc_compile, schedule, Machine, wait, collect_results, save_results, mpixlc_compile
+from utils import create_parser, schedule, Machine, wait, collect_results, save_results, mpixlc_compile
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s %(message)s',
+    logging.basicConfig(format='[%(asctime)s] %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p',
                         level=logging.INFO, stream=sys.stdout)
 
@@ -14,11 +14,8 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
 
     if args.mpi:
-        compile_args = ['-qsmp=omp', '-o', args.exec_file]
+        compile_args = [args.exec_file]
         mpixlc_compile(args.src_file, compile_args)
-    # else:
-    #     compile_args = ['-qsmp=omp', '-o', args.exec_file]
-    #     xlc_compile(args.src_file, compile_args)
     else:
         compile_args = ['-qsmp=omp', '-o', args.exec_file]
         mpixlc_compile(args.src_file, compile_args)
