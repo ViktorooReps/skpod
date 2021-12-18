@@ -118,7 +118,7 @@ omp__det(double *matrix, size_t len, int threads)
         mult_row(non_zero_diag_row, 1.0 / elem, len - diag_idx);
         det *= elem;
 
-#pragma omp parallel for private(diag_idx, row_idx, elem, elem, len) shared(matrix_copy, non_zero_row, non_zero_diag_row, det) num_threads(threads)
+#pragma omp parallel for private(diag_idx, row_idx, elem, len) shared(matrix_copy, non_zero_row, non_zero_diag_row, det) num_threads(threads)
         // reset elements under diagonal to 0
         for (row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
             non_zero_row = matrix_copy + row_idx * len + diag_idx;
@@ -152,15 +152,16 @@ main(int argc, char **argv)
     printf("<OUTPUT>");
 
     size_t len;
-    for (int i = 0; i < N_MATRIX_LENS; i++) {
-        len = n[i];
+    int len_idx, run_idx;
+    for (len_idx = 0; len_idx < N_MATRIX_LENS; ++len_idx) {
+        len = n[len_idx];
 
         matrix = alloc_matrix(len);
         init_matrix(matrix, len, MAX_DET_VALUE / len / len);
         true_det = det(matrix, len);
 
         avg_time = 0.0;
-        for (int k = 0; k < N_RUNS; k++) {
+        for (run_idx = 0; run_idx < N_RUNS; ++run_idx) {
             timer_omp = omp_get_wtime();
 
             if (threads < 2) {
