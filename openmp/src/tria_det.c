@@ -5,7 +5,7 @@
 #include <float.h>
 #include <omp.h>
 
-#define TIME_LIMIT 10
+#define TIME_LIMIT 5.0
 #define INIT_LEN 2
 #define LEN_MULTIPLIER 2
 #define LEN_STEP 0
