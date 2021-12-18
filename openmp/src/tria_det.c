@@ -5,13 +5,12 @@
 #include <float.h>
 #include <omp.h>
 
-#define N_RUNS 10
-#define N_MATRIX_LENS 12
+#define TIME_LIMIT 10
+#define INIT_LEN 2
+#define LEN_MULTIPLIER 2
+#define LEN_STEP 0
 #define SEED 42
 #define MAX_DET_VALUE 10.0
-
-#define MASTER_RANK 0
-#define NO_TAG 0
 
 #define EPS 1e-07
 #define ABS(a) ((a) < 0 ? -(a) : (a))
@@ -146,9 +145,7 @@ main(int argc, char **argv)
 {
     srand(SEED);
 
-    size_t n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096};
-
-    double timer_omp, avg_time, true_det, parallel_det;
+    double timer_omp, avg_time = 0.0, true_det, parallel_det;
     double *matrix;
 
     int threads;
@@ -157,11 +154,8 @@ main(int argc, char **argv)
     printf("running on %d threads\n", threads);
     printf("<OUTPUT>\n");
 
-    size_t len;
-    int len_idx, run_idx;
-    for (len_idx = 0; len_idx < N_MATRIX_LENS; ++len_idx) {
-        len = n[len_idx];
-
+    size_t len = INIT_LEN;
+    while (avg_time < TIME_LIMIT) {
         matrix = alloc_matrix(len);
         init_matrix(matrix, len, MAX_DET_VALUE / len / len);
         true_det = det(matrix, len);
@@ -186,6 +180,8 @@ main(int argc, char **argv)
 
         printf("%zu\t%d\t%f\n", len, threads, avg_time);
         free(matrix);
+
+        len = len * LEN_MULTIPLIER + LEN_STEP;
     }
 
     printf("<OUTPUT>\n");

@@ -4,8 +4,8 @@
 #include <float.h>
 #include <mpi.h>
 
-#define N_RUNS 10
-#define N_MATRIX_LENS 10
+#define TIME_LIMIT 10
+#define INIT_LEN 2
 #define SEED 42
 #define MAX_DET_VALUE 10000.0
 #define MASTER_RANK 0

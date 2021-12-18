@@ -5,8 +5,10 @@
 #include <float.h>
 #include <mpi.h>
 
-#define N_RUNS 10
-#define N_MATRIX_LENS 12
+#define TIME_LIMIT 10
+#define INIT_LEN 2
+#define LEN_MULTIPLIER 2
+#define LEN_STEP 0
 #define SEED 42
 #define MAX_DET_VALUE 10.0
 
@@ -292,19 +294,15 @@ main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &threads);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    size_t n[N_MATRIX_LENS] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096};
-
-    double timer_mpi, avg_time, true_det, parallel_det;
+    double timer_mpi, avg_time = 0.0, true_det, parallel_det;
     double *matrix;
     if (!rank) {
         printf("running on %d processes\n", threads);
         printf("<OUTPUT>\n");
     }
 
-    size_t len;
-    for (int i = 0; i < N_MATRIX_LENS; i++) {
-        len = n[i];
-
+    size_t len = INIT_LEN;
+    while (avg_time < TIME_LIMIT) {
         if (!rank) {
             matrix = alloc_matrix(len);
             init_matrix(matrix, len, MAX_DET_VALUE / len / len);
@@ -334,6 +332,8 @@ main(int argc, char **argv)
             printf("%zu\t%d\t%f\n", len, threads, avg_time);
             free(matrix);
         }
+
+        len = len * LEN_MULTIPLIER + LEN_STEP;
     }
 
     if (!rank) {
