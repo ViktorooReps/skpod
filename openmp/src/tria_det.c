@@ -109,7 +109,7 @@ omp__det(double *matrix, size_t len, int threads)
 
     double det = 1.0;
     int diag_idx, row_idx;
-    #pragma omp parallel shared(matrix_copy) private(det) reduction(* : det) num_threads(threads)
+    #pragma omp parallel shared(matrix_copy) reduction(* : det) num_threads(threads)
     {
         for (diag_idx = 0; diag_idx < len; ++diag_idx) {
             // reset diagonal element to 1.0
