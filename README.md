@@ -13,4 +13,4 @@
 ![](mpi/graphs/polus/lineplot_big.png)
 
 # Conclusion
-Thread parallelization performs much better due to high data dependency
+Process parallelization comes with a lot of process communincation related computation losses so it is not reasonable to use it on smaller matrices. On larger matrices though it achieves better level of parallelization.
