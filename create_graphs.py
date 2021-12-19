@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     data_openmp = pd.read_csv('openmp/data/polus/data.csv', sep='\t')
     data_openmp = data_openmp[data_openmp['n'] > 2]
-    small_data = data_openmp[data_openmp['n'] < 2 ** 6]
+    small_data = data_openmp[data_openmp['n'] < 2 ** 8]
     big_data = data_openmp[data_openmp['n'] > 2 ** 7]
 
     palette = sns.color_palette("flare", 7)
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     data_mpi = pd.read_csv('mpi/data/polus/data.csv', sep='\t')
     data_mpi = data_mpi[data_mpi['n'] > 2]
-    small_data = data_mpi[data_mpi['n'] < 2 ** 6]
+    small_data = data_mpi[data_mpi['n'] < 2 ** 8]
     big_data = data_mpi[data_mpi['n'] > 2 ** 7]
 
     palette = sns.color_palette("flare", 7)
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     data_mpi = pd.read_csv('mpi/data/bluegene/data.csv', sep='\t')
     data_mpi = data_mpi[data_mpi['n'] > 2]
-    small_data = data_mpi[data_mpi['n'] < 2 ** 6]
+    small_data = data_mpi[data_mpi['n'] < 2 ** 8]
     big_data = data_mpi[data_mpi['n'] > 2 ** 7]
 
     palette = sns.color_palette("flare", 8)
