@@ -10,6 +10,7 @@ Use flag `--help` for the list of all available options and `--mpi` to compile f
 ## On MSU BlueGene machine
 
 MPI version does not work though due to the usage of group communications (as of 2021). Maybe BlueGene moderators will consider switching to newer MPI versions in future years.
+
 `python3.3 run_bluegene.py [NUMBER OF PROCESSES OR THREADS] --src_file /path/to/src.c (--mpi)`
 
 # OpenMP parallelized determinant computation
