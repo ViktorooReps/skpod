@@ -5,6 +5,7 @@ Use flag `--help` for the list of all available options and `--mpi` to compile f
 ## On MSU Polus machine
 
 `module load SpectrumMPI`
+
 `python3 run_polus.py [NUMBER OF PROCESSES OR THREADS] --src_file /path/to/src.c (--mpi)`
 
 ## On MSU BlueGene machine
