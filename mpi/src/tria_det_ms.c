@@ -50,12 +50,13 @@ det(double **matrix, size_t len)
 
 
 double
-mpi__det(double **matrix, size_t len, size_t threads, int rank)
+mpi__det(double **matrix, size_t len, MPI_Comm comm)
 {
-    MPI_Group world_group;
-    MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+    int threads, rank, err;
+    MPI_Comm_size(MPI_COMM_WORLD, &threads);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    double det = 1.0, res = 1.0;
+    double det = 1.0, res = 1.0, curr_res = 1.0;
 
     double *diag_row;
     double *compute_row;
@@ -65,7 +66,15 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
         diag_row = malloc(sizeof(double) * len);
     }
 
+    bool restart = false;
     for (int diag_idx = 0; diag_idx < len; ++diag_idx) {
+        if (restart) {
+            MPIX_Comm_shrink(comm, &comm);
+            MPI_Comm_size(MPI_COMM_WORLD, &threads);
+            MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+            restart = false;
+            diag_idx -= 1;
+        }
         if (!rank) {
             diag_row = matrix[diag_idx];
             double diag_elem = diag_row[diag_idx];
@@ -75,29 +84,20 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
 
         int slave_threads = threads - 1;
         int rows_to_process = len - (diag_idx + 1);
-        int working_threads = ((slave_threads > rows_to_process)? rows_to_process : slave_threads) + 1;
-        int *working_ranks = malloc(sizeof(int) * working_threads);
+        int working_threads = ((slave_threads > rows_to_process)? rows_to_process : slave_threads) + 1;  // master + all slaves
 
-        for (int worker_idx = 0; worker_idx < working_threads; ++worker_idx) {
-            working_ranks[worker_idx] = worker_idx;
-        }
+        if (rank < working_threads) {
+            slave_threads = working_threads - 1;  // recompute actual number of working slaves 
 
-        // working group consists of slaves (less or equal then rows_to_process) and master
-        MPI_Group working_group;
-        MPI_Group_incl(world_group, working_threads, working_ranks, &working_group);
+            err = MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, comm);  // point of synchronization
+            if (err != MPI_SUCCESS) {
+                // restart iteration with smaller comm
+                MPIX_Comm_shrink(comm, &comm);
+                diag_idx -= 1;
+                continue
+            }
 
-        MPI_Comm working_comm;
-        MPI_Comm_create_group(MPI_COMM_WORLD, working_group, 0, &working_comm);
-
-        // if process is not included in working_group it should skip rows computation
-        if (working_comm != MPI_COMM_NULL) {
-            slave_threads = working_threads - 1;
-            int working_rank;
-
-            MPI_Comm_rank(working_comm, &working_rank);
-            MPI_Bcast(diag_row, len, MPI_DOUBLE, 0, working_comm);  // point of synchronization
-
-            if (!working_rank) {
+            if (!rank) {
                 // send data to slave processes
                 MPI_Request request;
                 int dest, curr_tag;
@@ -105,34 +105,46 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                     dest = (row_idx - 1) % slave_threads + 1;
                     curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
-                    MPI_Send(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm);
+                    err = MPI_Isend(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, comm);
+                    if (err != MPI_SUCCESS) {
+                        restart = true;
+                    }
                 }
 
                 // make recv requests from processes
                 int total_requests = rows_to_process, next_diag = diag_idx + 1;
-                for (int row_idx = diag_idx + 1; row_idx < len; ++row_idx) {
+                for (int row_idx = diag_idx + 1; row_idx < len && !restart; ++row_idx) {
                     dest = (row_idx - 1) % slave_threads + 1;
                     curr_tag = (row_idx - diag_idx - 1) / slave_threads;
 
                     if (row_idx == next_diag) {
                         // need only next diag row to continue computation
-                        MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, MPI_STATUS_IGNORE);
+                        err = MPI_Recv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, comm, MPI_STATUS_IGNORE);
+                        if (err != MPI_SUCCESS) {
+                            restart = true;
+                        }
                     } else {
-                        MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, working_comm, &request);
+                        err = MPI_Irecv(matrix[row_idx], len, MPI_DOUBLE, dest, curr_tag, comm, &request);
+                        if (err != MPI_SUCCESS) {
+                            restart = true;
+                        }
                         MPI_Request_free(&request);
                     }
                 }
             } else {
                 int col_idx = diag_idx;
-                int assigned_row = working_rank;
+                int assigned_row = rank;
                 while (assigned_row <= diag_idx) {
                     assigned_row += slave_threads;
                 }
                 int curr_tag = 0;
-                MPI_Request request;
+
                 while (assigned_row < len) {
                     // receive data from master process
-                    MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm, MPI_STATUS_IGNORE);
+                    err = MPI_Recv(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, comm, MPI_STATUS_IGNORE);
+                    if (err != MPI_SUCCESS) {
+                        restart = true;
+                    }
 
                     // reset (assigned_row, col_idx) element to zero
                     double elem = compute_row[col_idx];
@@ -141,23 +153,29 @@ mpi__det(double **matrix, size_t len, size_t threads, int rank)
                     add_row_from_idx(compute_row, diag_row, len, col_idx);
 
                     // send modified data back to master
-                    MPI_Send(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, working_comm);
+                    err = MPI_Isend(compute_row, len, MPI_DOUBLE, MASTER_RANK, curr_tag, comm);
+                    if (err != MPI_SUCCESS) {
+                        restart = true;
+                    }
 
                     assigned_row += slave_threads;
                     curr_tag += 1;
                 }
+
+                err = MPI_Reduce(&det, &curr_res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, comm);  // synchronize current result
+                if (err != MPI_SUCCESS) {
+                    restart = true;
+                }
+                det = 1.0
+
+                if (!restart) {
+                    // if by the end of the procedure there is no need to restart, update current result
+                    res *= curr_res;
+                }
             }
-
-            MPI_Group_free(&working_group);
-            MPI_Comm_free(&working_comm);
         }
-
-        free(working_ranks);
     }
 
-    MPI_Reduce(&det, &res, 1, MPI_DOUBLE, MPI_PROD, MASTER_RANK, MPI_COMM_WORLD);
-
-    MPI_Group_free(&world_group);
     if (rank) {
         free(diag_row);
         free(compute_row);
@@ -234,7 +252,7 @@ main(int argc, char **argv)
                 // cannot use master-slave parallelization with one process :)
                 d = det(matrix, n[i]);
             } else {
-                d = mpi__det(matrix, n[i], threads, rank);
+                d = mpi__det(matrix, n[i], MPI_COMM_WORLD);
             }
 
             avg_time += MPI_Wtime() - timer_mpi;
