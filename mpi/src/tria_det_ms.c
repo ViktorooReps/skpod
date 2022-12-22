@@ -218,6 +218,7 @@ main(int argc, char **argv)
     srand(SEED);
 
     MPI_Init(&argc, &argv);
+    MPI_Comm_set_errhandler(comm, MPI_ERRORS_RETURN);
 
     int threads, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &threads);
@@ -249,7 +250,6 @@ main(int argc, char **argv)
 
             double d;
             if (threads < 2) {
-                // cannot use master-slave parallelization with one process :)
                 d = det(matrix, n[i]);
             } else {
                 d = mpi__det(matrix, n[i], MPI_COMM_WORLD);
